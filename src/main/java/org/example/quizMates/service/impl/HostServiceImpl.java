@@ -9,15 +9,16 @@ import org.example.quizMates.repository.HostRepository;
 import org.example.quizMates.service.HostService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class HostServiceImpl implements HostService {
     private final HostRepository hostRepository;
+    private final static String HOST_NOT_FOUND = "Host with id %s not found";
 
     @Override
     public Host findById(Long id) {
-        return hostRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
+        return hostRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(HOST_NOT_FOUND, id)));
     }
 
     @Override

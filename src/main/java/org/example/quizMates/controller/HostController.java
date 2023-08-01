@@ -20,7 +20,6 @@ import org.example.quizMates.service.impl.HostServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.IDN;
 import java.util.List;
 
 @WebServlet("/hosts")
@@ -28,7 +27,7 @@ import java.util.List;
 public class HostController extends HttpServlet {
     private final HostService hostService;
     private static final Gson gson = new Gson();
-    private static final String ID_COL = "id";
+    private static final String ID_PARAM = "id";
 
 
     public HostController() {
@@ -46,6 +45,7 @@ public class HostController extends HttpServlet {
             writer.println(hosts);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -59,6 +59,7 @@ public class HostController extends HttpServlet {
             hostService.createHost(createHostDto);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -72,6 +73,7 @@ public class HostController extends HttpServlet {
             hostService.updateHost(updateHostDto);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -81,11 +83,11 @@ public class HostController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            String hostId = req.getParameter(ID_COL);
-
+            String hostId = req.getParameter(ID_PARAM);
             hostService.deleteById(Long.parseLong(hostId));
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
