@@ -11,6 +11,6 @@ import lombok.ToString;
 @ToString
 public class UpdatePairDto {
     private Long id;
-    private String studentA;
-    private String studentB;
+    private Long studentA;
+    private Long studentB;
 }

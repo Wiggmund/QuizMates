@@ -38,8 +38,8 @@ public class PairRepositoryImpl implements PairRepository {
         try (Connection connection = dbConnection.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(CREATE_SQL);
         ) {
-            preparedStatement.setString(1, dto.getStudentA());
-            preparedStatement.setString(2, dto.getStudentB());
+            preparedStatement.setLong(1, dto.getStudentA());
+            preparedStatement.setLong(2, dto.getStudentB());
             preparedStatement.executeUpdate();
         }catch (SQLException ex) {
             throw new DBInternalException(ex.getMessage());
@@ -52,8 +52,8 @@ public class PairRepositoryImpl implements PairRepository {
         PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
         ) {
             preparedStatement.setLong(1, dto.getId());
-            preparedStatement.setString(2, dto.getStudentA());
-            preparedStatement.setString(3, dto.getStudentB());
+            preparedStatement.setLong(2, dto.getStudentA());
+            preparedStatement.setLong(3, dto.getStudentB());
             preparedStatement.executeUpdate();
         }catch (SQLException ex) {
             throw new DBInternalException(ex.getMessage());
@@ -114,7 +114,7 @@ public class PairRepositoryImpl implements PairRepository {
         try (Connection connection = dbConnection.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)
         ) {
-            preparedStatement.executeQuery();
+            preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
             throw new DBInternalException(ex.getMessage());
