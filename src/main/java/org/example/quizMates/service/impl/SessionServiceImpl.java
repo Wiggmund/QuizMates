@@ -13,13 +13,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
-    private final static String USER_NOT_FOUND = "User with id %s not found";
+    private final static String SESSION_NOT_FOUND = "Session with id %s not found";
 
     @Override
     public Session findById(Long id) {
-
-        return sessionRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException(String.format(USER_NOT_FOUND, id)));
+        return sessionRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(SESSION_NOT_FOUND, id)));
     }
 
     @Override
@@ -35,7 +34,6 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void createSession(CreateSessionDto dto) {
-
         sessionRepository.createSession(dto);
     }
 

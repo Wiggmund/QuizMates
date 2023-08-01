@@ -67,12 +67,13 @@ public class SessionController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            BufferedReader reader = req.getReader();
-            CreateSessionDto sessionDto = gson.fromJson(reader, CreateSessionDto.class);
+            CreateSessionDto sessionDto = gson.fromJson(req.getReader(), CreateSessionDto.class);
             sessionService.createSession(sessionDto);
+            resp.setStatus(HttpServletResponse.SC_CREATED);
             writer.println(sessionDto);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -83,7 +84,6 @@ public class SessionController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
         try {
             UpdateSessionDto dto = gson.fromJson(req.getReader(), UpdateSessionDto.class);
-            writer.println(dto);
             sessionService.updateSession(dto);
             resp.setStatus(HttpServletResponse.SC_ACCEPTED);
         } catch (RuntimeException exception) {
