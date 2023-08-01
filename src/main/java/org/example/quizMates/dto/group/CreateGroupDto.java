@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class CreateGroupDto {
     private String name;
-    private Long student;
+    private String studentId;
 }
