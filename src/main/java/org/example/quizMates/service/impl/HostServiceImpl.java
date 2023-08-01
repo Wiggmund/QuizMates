@@ -21,7 +21,7 @@ public class HostServiceImpl implements HostService {
 
     @Override
     public List<Host> findAll() {
-        return null;
+        return hostRepository.findAll();
     }
 
     @Override
