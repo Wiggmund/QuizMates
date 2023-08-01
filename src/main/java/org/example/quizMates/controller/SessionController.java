@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.dto.session.CreateSessionDto;
+import org.example.quizMates.dto.session.UpdateSessionDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Session;
@@ -31,17 +32,15 @@ public class SessionController extends HttpServlet {
     private final SessionService sessionService;
     private final static String ID_REQ_PARAM = "id";
 
+    private static Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
+
     public SessionController() {
         this(new SessionServiceImpl(
                 new SessionRepositoryImpl(
                         new DBConnectionDriverManager(
                                 new PostgreSQLConfig()))));
-    }
-
-    private static Gson gsonLocalDateAdapted(){
-        return new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .create();
     }
 
     @Override
@@ -51,10 +50,10 @@ public class SessionController extends HttpServlet {
             String requiredId = req.getParameter(ID_REQ_PARAM);
             if (requiredId == null || requiredId.isEmpty()) {
                 List<Session> sessions = sessionService.findAll();
-                writer.println(gsonLocalDateAdapted().toJson(sessions));
+                writer.println(gson.toJson(sessions));
             } else {
                 Session session = sessionService.findById(Long.parseLong(requiredId));
-                writer.println(gsonLocalDateAdapted().toJson(session));
+                writer.println(gson.toJson(session));
             }
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
@@ -69,7 +68,7 @@ public class SessionController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
         try {
             BufferedReader reader = req.getReader();
-            CreateSessionDto sessionDto = gsonLocalDateAdapted().fromJson(reader, CreateSessionDto.class);
+            CreateSessionDto sessionDto = gson.fromJson(reader, CreateSessionDto.class);
             sessionService.createSession(sessionDto);
             writer.println(sessionDto);
         } catch (RuntimeException exception) {
@@ -83,9 +82,13 @@ public class SessionController extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            UpdateSessionDto dto = gson.fromJson(req.getReader(), UpdateSessionDto.class);
+            writer.println(dto);
+            sessionService.updateSession(dto);
+            resp.setStatus(HttpServletResponse.SC_ACCEPTED);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -95,9 +98,12 @@ public class SessionController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            long requiredId = Long.parseLong(req.getParameter(ID_REQ_PARAM));
+            sessionService.deleteById(requiredId);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();

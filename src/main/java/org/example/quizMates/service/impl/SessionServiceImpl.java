@@ -29,7 +29,8 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void deleteById(Long id) {
-
+        findById(id);
+        sessionRepository.deleteById(id);
     }
 
     @Override
@@ -40,6 +41,7 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void updateSession(UpdateSessionDto dto) {
-
+        findById(dto.getId());
+        sessionRepository.updateSession(dto);
     }
 }

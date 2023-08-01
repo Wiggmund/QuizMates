@@ -17,20 +17,24 @@ import java.util.Optional;
 public class SessionRepositoryImpl implements SessionRepository {
     private static final String TABLE_NAME = "sessions";
     private final static String ID_COL = "id";
-    private static final String TITLE_NAME_COL = "title";
+    private static final String TITLE_COL = "title";
     private final static String DESCRIPTION_COL = "description";
     private final static String DATE_COL = "date";
     private final static String BEST_STUDENT_COL = "best_student";
     private final static String BEST_GROUP_COL = "best_group";
     private final static String STATUS_COL = "status";
     private static final String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
-    private static final String SELECT_SESSION_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
+    private static final String SELECT_SESSION_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME,
+            ID_COL);
     private final static String CREATE_SESSIONS_SQL = String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s) " +
-            "VALUES(?,?,?,?,?,?)", TABLE_NAME, TITLE_NAME_COL, DESCRIPTION_COL, DATE_COL, BEST_STUDENT_COL, BEST_GROUP_COL, STATUS_COL);
-    //    private final static String UPDATE_USER_SQL = String.format(
-//            "UPDATE %s SET %s = ?, %s = ?, %s = ? WHERE %s = ?",
-//            TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL, AGE_COL, ID_COL);
-    private static final String DELETE_USER_SQL = String.format("DELETE FROM %s WHERE id = ?", TABLE_NAME);
+                    "VALUES(?,?,?,?,?,?)", TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, BEST_STUDENT_COL,
+            BEST_GROUP_COL, STATUS_COL);
+    private final static String UPDATE_SQL = String.format(
+            "UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ?,  %s = ?  WHERE %s = ?",
+            TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, BEST_STUDENT_COL, BEST_GROUP_COL,
+            STATUS_COL, ID_COL);
+
+    private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE id = ?", TABLE_NAME);
 
     private final DBConnection dbConnection;
 
@@ -46,7 +50,7 @@ public class SessionRepositoryImpl implements SessionRepository {
                 if (resultSet.next()) {
                     Session fetchedSession = Session.builder()
                             .id(resultSet.getLong(ID_COL))
-                            .title(resultSet.getString(TITLE_NAME_COL))
+                            .title(resultSet.getString(TITLE_COL))
                             .description(resultSet.getString(DESCRIPTION_COL))
                             .date(resultSet.getTimestamp(DATE_COL).toLocalDateTime())
                             .best_student(resultSet.getLong(BEST_STUDENT_COL))
@@ -77,7 +81,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             while (resultSet.next()) {
                 Session fetchedSession = Session.builder()
                         .id(resultSet.getLong(ID_COL))
-                        .title(resultSet.getString(TITLE_NAME_COL))
+                        .title(resultSet.getString(TITLE_COL))
                         .description(resultSet.getString(DESCRIPTION_COL))
                         .date(resultSet.getTimestamp(DATE_COL).toLocalDateTime())
                         .best_student(resultSet.getLong(BEST_STUDENT_COL))
@@ -94,8 +98,16 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
-    public void deleteById(Long aLong) {
-
+    public void deleteById(Long id) {
+        try(
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(DELETE_SQL)
+        ) {
+            statement.setLong(1, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 
     @Override
@@ -119,5 +131,20 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public void updateSession(UpdateSessionDto dto) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+        ) {
+            statement.setString(1, dto.getTitle());
+            statement.setString(2, dto.getDescription());
+            statement.setTimestamp(3, Timestamp.valueOf(dto.getDate()));
+            statement.setLong(4, dto.getBestStudent());
+            statement.setLong(5, dto.getBestGroup());
+            statement.setBoolean(6, dto.getStatus());
+            statement.setLong(7, dto.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 }
