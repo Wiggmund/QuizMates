@@ -8,15 +8,14 @@ import org.example.quizMates.repository.HostRepository;
 import org.example.quizMates.service.HostService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class HostServiceImpl implements HostService {
     private final HostRepository hostRepository;
 
     @Override
-    public Optional<Host> findById(Long aLong) {
-        return Optional.empty();
+    public Host findById(Long aLong) {
+        return null;
     }
 
     @Override
