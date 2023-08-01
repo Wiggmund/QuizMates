@@ -30,7 +30,7 @@ public class PairServiceImpl implements PairService {
     }
 
     @Override
-    public Pair createPair(CreatePairDto dto) {
+    public CreatePairDto createPair(CreatePairDto dto) {
         pairRepository.createPair(dto);
         return dto;
     }
