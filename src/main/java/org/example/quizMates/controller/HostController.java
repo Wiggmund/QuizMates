@@ -27,7 +27,7 @@ import java.util.List;
 public class HostController extends HttpServlet {
     private final HostService hostService;
     private static final Gson gson = new Gson();
-    private static final String ID_PARAM = "id";
+    private static final String ID_REQ_PARAM = "id";
 
 
     public HostController() {
@@ -83,7 +83,7 @@ public class HostController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            String hostId = req.getParameter(ID_PARAM);
+            String hostId = req.getParameter(ID_REQ_PARAM);
             hostService.deleteById(Long.parseLong(hostId));
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
