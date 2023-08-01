@@ -8,15 +8,14 @@ import org.example.quizMates.repository.StudentRepository;
 import org.example.quizMates.service.StudentService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
 
     @Override
-    public Optional<Student> findById(Long aLong) {
-        return Optional.empty();
+    public Student findById(Long aLong) {
+        return null;
     }
 
     @Override

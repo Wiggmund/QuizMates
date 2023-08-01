@@ -8,15 +8,14 @@ import org.example.quizMates.repository.PairRepository;
 import org.example.quizMates.service.PairService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class PairServiceImpl implements PairService {
     private final PairRepository pairRepository;
 
     @Override
-    public Optional<Pair> findById(Long aLong) {
-        return Optional.empty();
+    public Pair findById(Long aLong) {
+        return null;
     }
 
     @Override
