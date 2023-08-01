@@ -7,12 +7,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.service.HostService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet("/hosts")
 public class HostController extends HttpServlet {
+    private final HostService hostService;
+
+    public HostController(HostService hostService) {
+        this.hostService = hostService;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();

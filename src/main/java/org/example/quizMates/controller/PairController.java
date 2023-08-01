@@ -7,12 +7,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.service.PairService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet("/pairs")
 public class PairController extends HttpServlet {
+    private final PairService pairService;
+
+    public PairController(PairService pairService) {
+        this.pairService = pairService;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
