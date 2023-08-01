@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.dto.pair.CreatePairDto;
+import org.example.quizMates.dto.pair.UpdatePairDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Pair;
@@ -46,7 +47,7 @@ public class PairController extends HttpServlet {
                 List<Pair> allPairs = pairService.findAll();
                 writer.println(gson.toJson(allPairs));
             } else {
-                Optional<Pair> byId = pairService.findById(Long.parseLong(id));
+                Pair byId = pairService.findById(Long.parseLong(id));
                 writer.println(gson.toJson(byId));
             }
         } catch (RuntimeException exception) {
@@ -64,7 +65,6 @@ public class PairController extends HttpServlet {
             CreatePairDto createPairDto = gson.fromJson(req.getReader(), CreatePairDto.class);
             pairService.createPair(createPairDto);
             resp.setStatus(HttpServletResponse.SC_CREATED);
-            // не уверен нужно ли после создания вывести список пар
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             resp.setStatus(exceptionResponse.statusCode());
@@ -77,31 +77,29 @@ public class PairController extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            String id = req.getParameter(ID);
-            if (id == null) {
-
-            } else {
-                Optional<Pair> byId = pairService.findById(Long.parseLong(id));
-                pairService.updatePair(byId);
-                writer.println(gson.toJson(byId));
-            }
-            } catch(RuntimeException exception){
-                ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-                resp.setStatus(exceptionResponse.statusCode());
-                writer.println(exceptionResponse.message());
-            }
-            writer.close();
+            UpdatePairDto updatePairDto = gson.fromJson(req.getReader(), UpdatePairDto.class);
+            pairService.updatePair(updatePairDto);
+            resp.setStatus(HttpServletResponse.SC_ACCEPTED);
+        } catch (RuntimeException exception) {
+            ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
+            writer.println(exceptionResponse.message());
         }
-
-        @Override
-        protected void doDelete (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-            PrintWriter writer = resp.getWriter();
-            try {
-                writer.println("Your JSON response");
-            } catch (RuntimeException exception) {
-                ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-                writer.println(exceptionResponse.message());
-            }
-            writer.close();
-        }
+        writer.close();
     }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        PrintWriter writer = resp.getWriter();
+        try {
+            Long id = Long.parseLong(req.getParameter(ID));
+            pairService.deleteById(id);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (RuntimeException exception) {
+            ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
+            writer.println(exceptionResponse.message());
+        }
+        writer.close();
+    }
+}
