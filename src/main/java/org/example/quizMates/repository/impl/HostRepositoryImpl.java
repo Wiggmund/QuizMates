@@ -47,9 +47,9 @@ public class HostRepositoryImpl implements HostRepository {
                             .lastName(resultSet.getString(LAST_NAME_COL))
                             .build();
                     return Optional.of(host);
-                } else {
-                    return Optional.empty();
                 }
+
+                return Optional.empty();
             }
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -73,10 +73,11 @@ public class HostRepositoryImpl implements HostRepository {
                 hosts.add(host);
             }
 
+            return hosts;
+
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }
-        return hosts;
     }
 
     @Override

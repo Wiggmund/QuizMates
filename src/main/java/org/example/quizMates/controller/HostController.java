@@ -20,13 +20,15 @@ import org.example.quizMates.service.impl.HostServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.IDN;
 import java.util.List;
 
 @WebServlet("/hosts")
 @RequiredArgsConstructor
 public class HostController extends HttpServlet {
     private final HostService hostService;
-    private final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
+    private static final String ID_COL = "id";
 
 
     public HostController() {
@@ -41,8 +43,7 @@ public class HostController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
         try {
             List<Host> hosts = hostService.findAll();
-            String json = gson.toJson(hosts);
-            writer.println(json);
+            writer.println(hosts);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             writer.println(exceptionResponse.message());
@@ -71,7 +72,7 @@ public class HostController extends HttpServlet {
             hostService.updateHost(updateHostDto);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            resp.getWriter().println(exceptionResponse.message());
+            writer.println(exceptionResponse.message());
         }
         writer.close();
     }
@@ -80,7 +81,7 @@ public class HostController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            String hostId = req.getParameter("id");
+            String hostId = req.getParameter(ID_COL);
 
             hostService.deleteById(Long.parseLong(hostId));
         } catch (RuntimeException exception) {
