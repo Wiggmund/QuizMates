@@ -10,6 +10,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class CreatePairDto {
-    private Long studentA;
-    private Long studentB;
+    private String studentA;
+    private String studentB;
 }
