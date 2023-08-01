@@ -30,7 +30,7 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void createSession(CreateSessionDto dto) {
-
+        sessionRepository.createSession(dto);
     }
 
     @Override
