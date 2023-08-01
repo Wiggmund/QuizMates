@@ -13,6 +13,7 @@ import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.dto.session.CreateSessionDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.model.Session;
 import org.example.quizMates.repository.impl.SessionRepositoryImpl;
 import org.example.quizMates.service.LocalDateTimeAdapter;
 import org.example.quizMates.service.SessionService;
@@ -22,11 +23,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @WebServlet("/sessions")
 @RequiredArgsConstructor
 public class SessionController extends HttpServlet {
     private final SessionService sessionService;
+    private final static String ID_REQ_PARAM = "id";
 
     public SessionController() {
         this(new SessionServiceImpl(
@@ -35,13 +38,27 @@ public class SessionController extends HttpServlet {
                                 new PostgreSQLConfig()))));
     }
 
+    private static Gson gsonLocalDateAdapted(){
+        return new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            String requiredId = req.getParameter(ID_REQ_PARAM);
+            if (requiredId == null || requiredId.isEmpty()) {
+                List<Session> sessions = sessionService.findAll();
+                writer.println(gsonLocalDateAdapted().toJson(sessions));
+            } else {
+                Session session = sessionService.findById(Long.parseLong(requiredId));
+                writer.println(gsonLocalDateAdapted().toJson(session));
+            }
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -52,12 +69,9 @@ public class SessionController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
         try {
             BufferedReader reader = req.getReader();
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                    .create();
-            CreateSessionDto sessionDto = gson.fromJson(reader, CreateSessionDto.class);
+            CreateSessionDto sessionDto = gsonLocalDateAdapted().fromJson(reader, CreateSessionDto.class);
+            sessionService.createSession(sessionDto);
             writer.println(sessionDto);
-            System.out.println(sessionDto);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             writer.println(exceptionResponse.message());
