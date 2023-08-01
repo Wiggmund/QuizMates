@@ -28,6 +28,8 @@ public class StudentRepositoryImpl implements StudentRepository {
     private final static String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
     private final static String CREATE_SQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)",
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL);
+    private final static String UPDATE_SQL = String.format("UPDATE %s SET %s = ?, %s = ? WHERE %s = ?",
+            TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL, ID_COL);
 
     @Override
     public Optional<Student> findById(Long id) {
@@ -101,6 +103,16 @@ public class StudentRepositoryImpl implements StudentRepository {
 
     @Override
     public void updateStudent(UpdateStudentDto dto) {
-
+        try(
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+        ) {
+            statement.setString(1, dto.getFirstName());
+            statement.setString(2, dto.getLastName());
+            statement.setLong(3, dto.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 }

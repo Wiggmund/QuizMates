@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.dto.student.CreateStudentDto;
+import org.example.quizMates.dto.student.UpdateStudentDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Student;
@@ -75,7 +76,9 @@ public class StudentController extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            UpdateStudentDto dto = gson.fromJson(req.getReader(), UpdateStudentDto.class);
+            studentService.updateStudent(dto);
+            resp.setStatus(HttpServletResponse.SC_ACCEPTED);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             resp.setStatus(exceptionResponse.statusCode());

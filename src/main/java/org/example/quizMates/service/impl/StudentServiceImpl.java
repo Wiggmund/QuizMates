@@ -38,6 +38,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void updateStudent(UpdateStudentDto dto) {
-
+        findById(dto.getId());
+        studentRepository.updateStudent(dto);
     }
 }
