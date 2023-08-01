@@ -5,19 +5,28 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.example.quizMates.db.DBConnectionDriverManager;
+import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.repository.impl.GroupRepositoryImpl;
 import org.example.quizMates.service.GroupService;
+import org.example.quizMates.service.impl.GroupServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet("/groups")
+@RequiredArgsConstructor
 public class GroupController extends HttpServlet {
     private final GroupService groupService;
 
-    public GroupController(GroupService groupService) {
-        this.groupService = groupService;
+    public GroupController() {
+        this(new GroupServiceImpl(
+                new GroupRepositoryImpl(
+                        new DBConnectionDriverManager(
+                                new PostgreSQLConfig()))));
     }
 
     @Override

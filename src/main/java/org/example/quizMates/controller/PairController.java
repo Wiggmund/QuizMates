@@ -5,19 +5,28 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.example.quizMates.db.DBConnectionDriverManager;
+import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.repository.impl.PairRepositoryImpl;
 import org.example.quizMates.service.PairService;
+import org.example.quizMates.service.impl.PairServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet("/pairs")
+@RequiredArgsConstructor
 public class PairController extends HttpServlet {
     private final PairService pairService;
 
-    public PairController(PairService pairService) {
-        this.pairService = pairService;
+    public PairController() {
+        this(new PairServiceImpl(
+                new PairRepositoryImpl(
+                        new DBConnectionDriverManager(
+                                new PostgreSQLConfig()))));
     }
 
     @Override

@@ -5,19 +5,28 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.example.quizMates.db.DBConnectionDriverManager;
+import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.repository.impl.StudentRepositoryImpl;
 import org.example.quizMates.service.StudentService;
+import org.example.quizMates.service.impl.StudentServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet("/students")
+@RequiredArgsConstructor
 public class StudentController extends HttpServlet {
     private final StudentService studentService;
 
-    public StudentController(StudentService studentService) {
-        this.studentService = studentService;
+    public StudentController() {
+        this(new StudentServiceImpl(
+                new StudentRepositoryImpl(
+                        new DBConnectionDriverManager(
+                                new PostgreSQLConfig()))));
     }
 
     @Override

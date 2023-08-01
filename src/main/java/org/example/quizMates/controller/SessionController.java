@@ -5,19 +5,28 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.example.quizMates.db.DBConnectionDriverManager;
+import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.repository.impl.SessionRepositoryImpl;
 import org.example.quizMates.service.SessionService;
+import org.example.quizMates.service.impl.SessionServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet("/sessions")
+@RequiredArgsConstructor
 public class SessionController extends HttpServlet {
     private final SessionService sessionService;
 
-    public SessionController(SessionService sessionService) {
-        this.sessionService = sessionService;
+    public SessionController() {
+        this(new SessionServiceImpl(
+                new SessionRepositoryImpl(
+                        new DBConnectionDriverManager(
+                                new PostgreSQLConfig()))));
     }
 
     @Override
