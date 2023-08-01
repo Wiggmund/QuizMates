@@ -25,7 +25,11 @@ public class HostRepositoryImpl implements HostRepository {
     private static final String SELECT_ALL_SQL =String.format("SELECT * FROM %s", TABLE_NAME);
     private static final String CREATE_USER_SQL =String.format("INSERT INTO hosts (%s, %s) VALUES (?, ?)",
             FIRST_NAME, LAST_NAME);
-    String insertHostSql = "INSERT INTO hosts (first_name, last_name) VALUES (?, ?)";
+    private static final String UPDATE_HOST_SQL = String.format("UPDATE %s SET %s = ?, %s = ? WHERE %s = ?",
+            TABLE_NAME, FIRST_NAME, LAST_NAME, ID);
+    private static final String DELETE_HOST_SQL = String.format("DELETE FROM %s WHERE %s = ?", TABLE_NAME, ID);
+
+
 
     private final DBConnection dbConnection;
 
@@ -59,7 +63,14 @@ public class HostRepositoryImpl implements HostRepository {
 
     @Override
     public void deleteById(Long aLong) {
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(DELETE_HOST_SQL)) {
 
+            ps.setLong(1, aLong);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 
     @Override
@@ -78,6 +89,15 @@ public class HostRepositoryImpl implements HostRepository {
 
     @Override
     public void updateHost(UpdateHostDto dto) {
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(UPDATE_HOST_SQL)) {
 
+            ps.setString(1, dto.getFirstName());
+            ps.setString(2, dto.getLastName());
+            ps.setLong(3, dto.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 }

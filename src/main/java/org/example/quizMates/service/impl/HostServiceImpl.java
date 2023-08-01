@@ -25,7 +25,7 @@ public class HostServiceImpl implements HostService {
 
     @Override
     public void deleteById(Long aLong) {
-
+        hostRepository.deleteById(aLong);
     }
 
     @Override
@@ -35,6 +35,6 @@ public class HostServiceImpl implements HostService {
 
     @Override
     public void updateHost(UpdateHostDto dto) {
-
+        hostRepository.updateHost(dto);
     }
 }

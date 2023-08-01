@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.dto.host.CreateHostDto;
+import org.example.quizMates.dto.host.UpdateHostDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Host;
@@ -66,10 +67,11 @@ public class HostController extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            UpdateHostDto updateHostDto = gson.fromJson(req.getReader(), UpdateHostDto.class);
+            hostService.updateHost(updateHostDto);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            writer.println(exceptionResponse.message());
+            resp.getWriter().println(exceptionResponse.message());
         }
         writer.close();
     }
@@ -78,7 +80,9 @@ public class HostController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            String hostId = req.getParameter("id");
+
+            hostService.deleteById(Long.parseLong(hostId));
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             writer.println(exceptionResponse.message());
