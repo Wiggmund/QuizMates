@@ -19,7 +19,7 @@ public class PairServiceImpl implements PairService {
     @Override
     public Pair findById(Long id) {
         return pairRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException(String.format(PAIR_NOT_FOUND)));
+                () -> new ResourceNotFoundException(String.format(PAIR_NOT_FOUND, id)));
     }
 
     @Override

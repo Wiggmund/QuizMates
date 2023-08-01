@@ -1,7 +1,6 @@
 package org.example.quizMates.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,14 +21,13 @@ import org.example.quizMates.service.impl.PairServiceImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Optional;
 
 @WebServlet("/pairs")
 @RequiredArgsConstructor
 public class PairController extends HttpServlet {
     private final PairService pairService;
     private final static Gson gson = new Gson();
-    private final static String ID = "id";
+    private final static String ID_REQ_PARAM = "id";
 
     public PairController() {
         this(new PairServiceImpl(
@@ -42,13 +40,13 @@ public class PairController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            String id = req.getParameter(ID);
-            if (id == null) {
+            String id = req.getParameter(ID_REQ_PARAM);
+            if (id == null || id.isEmpty()) {
                 List<Pair> allPairs = pairService.findAll();
                 writer.println(gson.toJson(allPairs));
             } else {
-                Pair byId = pairService.findById(Long.parseLong(id));
-                writer.println(gson.toJson(byId));
+                Pair pair = pairService.findById(Long.parseLong(id));
+                writer.println(gson.toJson(pair));
             }
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
@@ -92,7 +90,7 @@ public class PairController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            Long id = Long.parseLong(req.getParameter(ID));
+            Long id = Long.parseLong(req.getParameter(ID_REQ_PARAM));
             pairService.deleteById(id);
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
