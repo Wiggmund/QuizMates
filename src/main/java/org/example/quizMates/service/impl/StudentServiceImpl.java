@@ -31,7 +31,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void createStudent(CreateStudentDto dto) {
-
+        studentRepository.createStudent(dto);
     }
 
     @Override
