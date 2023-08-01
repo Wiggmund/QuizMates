@@ -29,9 +29,8 @@ public class PairServiceImpl implements PairService {
     }
 
     @Override
-    public CreatePairDto createPair(CreatePairDto dto) {
+    public void createPair(CreatePairDto dto) {
         pairRepository.createPair(dto);
-        return dto;
     }
 
     @Override

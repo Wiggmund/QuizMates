@@ -5,6 +5,6 @@ import org.example.quizMates.dto.pair.UpdatePairDto;
 import org.example.quizMates.model.Pair;
 
 public interface PairService extends CrudService<Pair, Long> {
-    CreatePairDto createPair(CreatePairDto dto);
+    void createPair(CreatePairDto dto);
     void updatePair(UpdatePairDto dto);
 }
