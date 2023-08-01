@@ -41,8 +41,15 @@ public class HostController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            List<Host> hosts = hostService.findAll();
-            writer.println(hosts);
+            String requiredId = req.getParameter(ID_REQ_PARAM);
+
+            if(requiredId == null || requiredId.isEmpty()) {
+                List<Host> hosts = hostService.findAll();
+                writer.println(gson.toJson(hosts));
+            } else {
+                Host host = hostService.findById(Long.parseLong(requiredId));
+                writer.println(gson.toJson(host));
+            }
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             resp.setStatus(exceptionResponse.statusCode());
