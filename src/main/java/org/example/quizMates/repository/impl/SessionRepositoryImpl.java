@@ -72,6 +72,5 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public void updateSession(UpdateSessionDto dto) {
-
     }
 }
