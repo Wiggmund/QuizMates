@@ -23,6 +23,10 @@ public class HostRepositoryImpl implements HostRepository {
     private static final String LAST_NAME = "last_name";
     private static final String TABLE_NAME = "hosts";
     private static final String SELECT_ALL_SQL =String.format("SELECT * FROM %s", TABLE_NAME);
+    private static final String CREATE_USER_SQL =String.format("INSERT INTO hosts (%s, %s) VALUES (?, ?)",
+            FIRST_NAME, LAST_NAME);
+    String insertHostSql = "INSERT INTO hosts (first_name, last_name) VALUES (?, ?)";
+
     private final DBConnection dbConnection;
 
     @Override
@@ -60,8 +64,17 @@ public class HostRepositoryImpl implements HostRepository {
 
     @Override
     public void createHost(CreateHostDto dto) {
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(CREATE_USER_SQL)) {
 
+            ps.setString(1, dto.getFirstName());
+            ps.setString(2, dto.getLastName());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
+
 
     @Override
     public void updateHost(UpdateHostDto dto) {

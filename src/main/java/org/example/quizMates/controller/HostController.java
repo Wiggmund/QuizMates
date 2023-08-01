@@ -19,7 +19,6 @@ import org.example.quizMates.service.impl.HostServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.List;
 
 @WebServlet("/hosts")
@@ -54,7 +53,8 @@ public class HostController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            CreateHostDto createHostDto = gson.fromJson(req.getReader(), CreateHostDto.class);
+            hostService.createHost(createHostDto);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             writer.println(exceptionResponse.message());

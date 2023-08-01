@@ -31,7 +31,7 @@ public class HostServiceImpl implements HostService {
 
     @Override
     public void createHost(CreateHostDto dto) {
-
+        hostRepository.createHost(dto);
     }
 
     @Override
