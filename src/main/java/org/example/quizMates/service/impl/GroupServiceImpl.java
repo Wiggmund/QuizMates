@@ -13,11 +13,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
-    private final static String USER_NOT_FOUND = "User with id %s not found";
+    private final static String GROUP_NOT_FOUND = "Group with id %s not found";
     @Override
     public Group findById(Long id) {
-        return groupRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException(String.format(USER_NOT_FOUND, id)));
+        return groupRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(GROUP_NOT_FOUND, id)));
     }
 
     @Override

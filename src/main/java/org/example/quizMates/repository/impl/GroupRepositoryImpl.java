@@ -22,8 +22,6 @@ public class GroupRepositoryImpl implements GroupRepository {
     private final static String ID_COL = "id";
     private final static String STUDENT_ID_COL = "student_id";
     private final static String NAME_COL = "name";
-
-
     private final static String SELECT_BY_ID_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
     private final static String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
@@ -34,13 +32,12 @@ public class GroupRepositoryImpl implements GroupRepository {
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
 
-
-
     @Override
     public Optional<Group> findById(Long id) {
         try(
-                Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SELECT_BY_ID_SQL) ) {
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SELECT_BY_ID_SQL)
+        ) {
             statement.setLong(1, id);
 
             try(ResultSet resultSet = statement.executeQuery()) {
@@ -61,14 +58,12 @@ public class GroupRepositoryImpl implements GroupRepository {
         }
     }
 
-
-
     @Override
     public List<Group> findAll() {
         try(
-                Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
-                ResultSet resultSet = statement.executeQuery()
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
+            ResultSet resultSet = statement.executeQuery()
         ) {
             List<Group> groups = new ArrayList<>();
 
@@ -91,8 +86,8 @@ public class GroupRepositoryImpl implements GroupRepository {
     @Override
     public void deleteById(Long id) {
         try(
-                Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(DELETE_SQL)
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(DELETE_SQL)
         ) {
             statement.setLong(1, id);
             statement.executeUpdate();
@@ -104,8 +99,8 @@ public class GroupRepositoryImpl implements GroupRepository {
     @Override
     public void createGroup(CreateGroupDto dto) {
         try(
-                Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(CREATE_SQL)
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(CREATE_SQL)
         ) {
             statement.setString(1, dto.getName());
             statement.setString(2, dto.getStudentId());
@@ -118,8 +113,8 @@ public class GroupRepositoryImpl implements GroupRepository {
     @Override
     public void updateGroup(UpdateGroupDto dto) {
         try(
-                Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
         ) {
             statement.setString(1, dto.getName());
             statement.setString(2, dto.getStudentId());

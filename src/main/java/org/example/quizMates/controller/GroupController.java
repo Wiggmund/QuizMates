@@ -41,9 +41,7 @@ public class GroupController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
-
         try {
-
             String requiredId = req.getParameter(ID_REQ_PARAM);
 
             if (requiredId == null || requiredId.isEmpty()) {

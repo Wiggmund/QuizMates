@@ -37,7 +37,8 @@ public class StudentRepositoryImpl implements StudentRepository {
     public Optional<Student> findById(Long id) {
         try(
             Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_BY_ID_SQL)) {
+            PreparedStatement statement = connection.prepareStatement(SELECT_BY_ID_SQL)
+        ) {
             statement.setLong(1, id);
 
             try(ResultSet resultSet = statement.executeQuery()) {

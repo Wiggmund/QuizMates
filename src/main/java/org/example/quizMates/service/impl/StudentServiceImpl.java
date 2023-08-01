@@ -13,12 +13,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
-    private final static String USER_NOT_FOUND = "User with id %s not found";
+    private final static String STUDENT_NOT_FOUND = "Student with id %s not found";
 
     @Override
     public Student findById(Long id) {
         return studentRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException(String.format(USER_NOT_FOUND, id)));
+                () -> new ResourceNotFoundException(String.format(STUDENT_NOT_FOUND, id)));
     }
 
     @Override
