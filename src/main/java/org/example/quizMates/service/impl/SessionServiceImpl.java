@@ -8,15 +8,14 @@ import org.example.quizMates.repository.SessionRepository;
 import org.example.quizMates.service.SessionService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
 
     @Override
-    public Optional<Session> findById(Long aLong) {
-        return Optional.empty();
+    public Session findById(Long aLong) {
+        return null;
     }
 
     @Override
