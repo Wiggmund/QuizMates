@@ -30,6 +30,8 @@ public class StudentRepositoryImpl implements StudentRepository {
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL);
     private final static String UPDATE_SQL = String.format("UPDATE %s SET %s = ?, %s = ? WHERE %s = ?",
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL, ID_COL);
+    private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
+            TABLE_NAME, ID_COL);
 
     @Override
     public Optional<Student> findById(Long id) {
@@ -83,8 +85,16 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public void deleteById(Long aLong) {
-
+    public void deleteById(Long id) {
+        try(
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(DELETE_SQL)
+        ) {
+            statement.setLong(1, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 
     @Override

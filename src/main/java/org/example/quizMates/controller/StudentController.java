@@ -91,9 +91,12 @@ public class StudentController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
+            long requiredId = Long.parseLong(req.getParameter(ID_REQ_PARAM));
+            studentService.deleteById(requiredId);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
