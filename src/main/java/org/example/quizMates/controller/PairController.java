@@ -27,6 +27,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PairController extends HttpServlet {
     private final PairService pairService;
+    private final static Gson gson = new Gson();
+    private final static String ID = "id";
 
     public PairController() {
         this(new PairServiceImpl(
@@ -39,17 +41,17 @@ public class PairController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            String id = req.getParameter("id");
+            String id = req.getParameter(ID);
             if (id == null) {
                 List<Pair> allPairs = pairService.findAll();
-      //          req.setAttribute("pairs", allPairs);
-            writer.println(new Gson().toJson(allPairs));
+                writer.println(gson.toJson(allPairs));
             } else {
                 Optional<Pair> byId = pairService.findById(Long.parseLong(id));
-                writer.println(new Gson().toJson(byId));
+                writer.println(gson.toJson(byId));
             }
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -59,13 +61,13 @@ public class PairController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            JsonObject jsonObject = new Gson().fromJson(req.getReader(), JsonObject.class);
-            CreatePairDto createPairDto = new Gson().fromJson(jsonObject, CreatePairDto.class);
-
-            Pair pair = pairService.createPair(createPairDto);
-            writer.println(new Gson().toJson(pair));
+            CreatePairDto createPairDto = gson.fromJson(req.getReader(), CreatePairDto.class);
+            pairService.createPair(createPairDto);
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+            // не уверен нужно ли после создания вывести список пар
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+            resp.setStatus(exceptionResponse.statusCode());
             writer.println(exceptionResponse.message());
         }
         writer.close();
@@ -75,23 +77,31 @@ public class PairController extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         try {
-            writer.println("Your JSON response");
-        } catch (RuntimeException exception) {
-            ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            writer.println(exceptionResponse.message());
-        }
-        writer.close();
-    }
+            String id = req.getParameter(ID);
+            if (id == null) {
 
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter writer = resp.getWriter();
-        try {
-            writer.println("Your JSON response");
-        } catch (RuntimeException exception) {
-            ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            writer.println(exceptionResponse.message());
+            } else {
+                Optional<Pair> byId = pairService.findById(Long.parseLong(id));
+                pairService.updatePair(byId);
+                writer.println(gson.toJson(byId));
+            }
+            } catch(RuntimeException exception){
+                ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+                resp.setStatus(exceptionResponse.statusCode());
+                writer.println(exceptionResponse.message());
+            }
+            writer.close();
         }
-        writer.close();
+
+        @Override
+        protected void doDelete (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            PrintWriter writer = resp.getWriter();
+            try {
+                writer.println("Your JSON response");
+            } catch (RuntimeException exception) {
+                ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
+                writer.println(exceptionResponse.message());
+            }
+            writer.close();
+        }
     }
-}
