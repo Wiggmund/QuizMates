@@ -56,7 +56,6 @@ public class SessionController extends HttpServlet {
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
             CreateSessionDto sessionDto = gson.fromJson(reader, CreateSessionDto.class);
-            sessionService.createSession(sessionDto);
             writer.println(sessionDto);
             System.out.println(sessionDto);
         } catch (RuntimeException exception) {
