@@ -13,6 +13,7 @@ import java.util.List;
 @ToString
 public class Group {
     private Long id;
+    private String studentId;
     private String name;
-    private List<Student> students;
+  //  private List<Student> students;
 }
