@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.quizMates.config.ApplicationConfig;
 import org.example.quizMates.dto.host.CreateHostDto;
 import org.example.quizMates.dto.host.UpdateHostDto;
 import org.example.quizMates.exception.ExceptionResponse;
@@ -14,6 +15,7 @@ import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Host;
 import org.example.quizMates.service.HostService;
 import org.example.quizMates.service.impl.HostServiceImpl;
+import org.example.quizMates.utils.ControllerHelper;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HostController extends HttpServlet {
     private final HostService hostService;
-    private static final Gson gson = new Gson();
+    private static final Gson gson = ApplicationConfig.GSON;
     private static final String ID_REQ_PARAM = "id";
 
     public HostController() {
@@ -32,64 +34,55 @@ public class HostController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter writer = resp.getWriter();
         try {
             String requiredId = req.getParameter(ID_REQ_PARAM);
 
             if(requiredId == null || requiredId.isEmpty()) {
                 List<Host> hosts = hostService.findAll();
-                writer.println(gson.toJson(hosts));
+                ControllerHelper.writeResponse(resp, hosts, HttpServletResponse.SC_OK);
             } else {
                 Host host = hostService.findById(Long.parseLong(requiredId));
-                writer.println(gson.toJson(host));
+                ControllerHelper.writeResponse(resp, host, HttpServletResponse.SC_OK);
             }
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            resp.setStatus(exceptionResponse.statusCode());
-            writer.println(exceptionResponse.message());
+            ControllerHelper.writeResponse(resp, exceptionResponse, exceptionResponse.statusCode());
         }
-        writer.close();
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter writer = resp.getWriter();
         try {
             CreateHostDto createHostDto = gson.fromJson(req.getReader(), CreateHostDto.class);
             hostService.createHost(createHostDto);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            resp.setStatus(exceptionResponse.statusCode());
-            writer.println(exceptionResponse.message());
+            ControllerHelper.writeResponse(resp, exceptionResponse, exceptionResponse.statusCode());
         }
-        writer.close();
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter writer = resp.getWriter();
         try {
             UpdateHostDto updateHostDto = gson.fromJson(req.getReader(), UpdateHostDto.class);
             hostService.updateHost(updateHostDto);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            resp.setStatus(exceptionResponse.statusCode());
-            writer.println(exceptionResponse.message());
+            ControllerHelper.writeResponse(resp, exceptionResponse, exceptionResponse.statusCode());
         }
-        writer.close();
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter writer = resp.getWriter();
         try {
             String hostId = req.getParameter(ID_REQ_PARAM);
             hostService.deleteById(Long.parseLong(hostId));
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
-            resp.setStatus(exceptionResponse.statusCode());
-            writer.println(exceptionResponse.message());
+            ControllerHelper.writeResponse(resp, exceptionResponse, exceptionResponse.statusCode());
         }
-        writer.close();
     }
 }
