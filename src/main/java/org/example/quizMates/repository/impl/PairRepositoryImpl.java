@@ -48,8 +48,9 @@ public class PairRepositoryImpl implements PairRepository {
 
     @Override
     public void updatePair(UpdatePairDto dto) {
-        try (Connection connection = dbConnection.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
+        try (
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
         ) {
             preparedStatement.setLong(1, dto.getId());
             preparedStatement.setLong(2, dto.getStudentA());
@@ -62,11 +63,11 @@ public class PairRepositoryImpl implements PairRepository {
 
     @Override
     public List<Pair> findAll() {
-        try
-                (Connection connection = dbConnection.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_SQL);
-                 ResultSet resultSet = preparedStatement.executeQuery();
-                ) {
+        try(
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_SQL);
+            ResultSet resultSet = preparedStatement.executeQuery();
+        ) {
             List<Pair> allPairs = new ArrayList<>();
 
             while (resultSet.next()) {
@@ -87,8 +88,8 @@ public class PairRepositoryImpl implements PairRepository {
     @Override
     public Optional<Pair> findById(Long id) {
         try (
-                Connection connection = dbConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL);
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL);
         ) {
             preparedStatement.setLong(1, id);
 
@@ -111,8 +112,9 @@ public class PairRepositoryImpl implements PairRepository {
 
     @Override
     public void deleteById(Long id) {
-        try (Connection connection = dbConnection.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)
+        try (
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)
         ) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
