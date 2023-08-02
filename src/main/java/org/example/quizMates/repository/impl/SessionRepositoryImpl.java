@@ -32,6 +32,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             "UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ?,  %s = ?  WHERE %s = ?",
             TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, BEST_STUDENT_COL, BEST_GROUP_COL, STATUS_COL, ID_COL);
     private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE id = ?", TABLE_NAME);
+    private static final String SELECT_SESSION_BY_TITLE = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, TITLE_COL);
 
     private final DBConnection dbConnection;
 
@@ -120,7 +121,32 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public Optional<Session> findByTitle(String title) {
-        return Optional.empty();
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(SELECT_SESSION_BY_TITLE)
+        ) {
+            ps.setString(1, title);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    Session fetchedSession = Session.builder()
+                            .id(resultSet.getLong(ID_COL))
+                            .title(resultSet.getString(TITLE_COL))
+                            .description(resultSet.getString(DESCRIPTION_COL))
+                            .date(resultSet.getTimestamp(DATE_COL).toLocalDateTime())
+                            .best_student(resultSet.getLong(BEST_STUDENT_COL))
+                            .best_group(resultSet.getLong(BEST_GROUP_COL))
+                            .status(resultSet.getBoolean(STATUS_COL))
+                            .build();
+
+                    return Optional.of(fetchedSession);
+                }
+
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 
     @Override
