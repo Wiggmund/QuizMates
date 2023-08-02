@@ -6,6 +6,7 @@ import org.example.quizMates.dto.host.UpdateHostDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Host;
 import org.example.quizMates.repository.HostRepository;
+import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.HostService;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HostServiceImpl implements HostService {
     private final HostRepository hostRepository;
+    private final DuplicationService duplicationService;
     private final static String HOST_NOT_FOUND = "Host with id %s not found";
 
     @Override

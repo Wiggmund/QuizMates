@@ -108,6 +108,11 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
+    public Optional<Session> findByTitle(String title) {
+        return Optional.empty();
+    }
+
+    @Override
     public void createSession(CreateSessionDto dto) {
         try (
             Connection connection = dbConnection.getConnection();

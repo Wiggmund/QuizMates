@@ -34,6 +34,11 @@ public class PairRepositoryImpl implements PairRepository {
             TABLE_NAME, ID_COL);
 
     @Override
+    public Optional<Pair> findByStudentAAndStudentB(Long studentA, Long studentB) {
+        return Optional.empty();
+    }
+
+    @Override
     public void createPair(CreatePairDto dto) {
         try (Connection connection = dbConnection.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(CREATE_SQL);

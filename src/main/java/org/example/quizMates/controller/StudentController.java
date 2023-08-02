@@ -14,8 +14,9 @@ import org.example.quizMates.dto.student.UpdateStudentDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Student;
-import org.example.quizMates.repository.impl.StudentRepositoryImpl;
+import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.StudentService;
+import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.StudentServiceImpl;
 
 import java.io.IOException;
@@ -31,9 +32,14 @@ public class StudentController extends HttpServlet {
 
     public StudentController() {
         this(new StudentServiceImpl(
-                new StudentRepositoryImpl(
-                        new DBConnectionDriverManager(
-                                new PostgreSQLConfig()))));
+                new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                new DuplicationServiceImpl(
+                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
+        );
     }
 
     @Override

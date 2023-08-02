@@ -6,6 +6,7 @@ import org.example.quizMates.dto.group.UpdateGroupDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Group;
 import org.example.quizMates.repository.GroupRepository;
+import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.GroupService;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
+    private final DuplicationService duplicationService;
     private final static String GROUP_NOT_FOUND = "Group with id %s not found";
     @Override
     public Group findById(Long id) {

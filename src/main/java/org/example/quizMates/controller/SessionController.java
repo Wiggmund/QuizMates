@@ -15,9 +15,10 @@ import org.example.quizMates.dto.session.UpdateSessionDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Session;
-import org.example.quizMates.repository.impl.SessionRepositoryImpl;
+import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.LocalDateTimeAdapter;
 import org.example.quizMates.service.SessionService;
+import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.SessionServiceImpl;
 
 import java.io.BufferedReader;
@@ -32,15 +33,20 @@ public class SessionController extends HttpServlet {
     private final SessionService sessionService;
     private final static String ID_REQ_PARAM = "id";
 
-    private static Gson gson = new GsonBuilder()
+    private final static Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
 
     public SessionController() {
         this(new SessionServiceImpl(
-                new SessionRepositoryImpl(
-                        new DBConnectionDriverManager(
-                                new PostgreSQLConfig()))));
+                new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                new DuplicationServiceImpl(
+                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
+        );
     }
 
     @Override

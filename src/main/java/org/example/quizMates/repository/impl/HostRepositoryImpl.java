@@ -99,6 +99,11 @@ public class HostRepositoryImpl implements HostRepository {
     }
 
     @Override
+    public Optional<Host> findByFirstNameAndLastName(String firstName, String lastName) {
+        return Optional.empty();
+    }
+
+    @Override
     public void createHost(CreateHostDto dto) {
         try (
             Connection connection = dbConnection.getConnection();

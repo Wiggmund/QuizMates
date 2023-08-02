@@ -6,6 +6,7 @@ import org.example.quizMates.dto.pair.UpdatePairDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Pair;
 import org.example.quizMates.repository.PairRepository;
+import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.PairService;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PairServiceImpl implements PairService {
     private final PairRepository pairRepository;
+    private final DuplicationService duplicationService;
 
     private final static String PAIR_NOT_FOUND= "Pair with id %s not found";
 
