@@ -1,14 +1,23 @@
 package org.example.quizMates.db;
 
-import lombok.RequiredArgsConstructor;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-@RequiredArgsConstructor
 public class DBConnectionDriverManager implements DBConnection {
     private final DBConfig dbConfig;
+
+    private DBConnectionDriverManager() {
+        this.dbConfig = PostgreSQLConfig.getInstance();
+    }
+
+    private static class DBConnectionDriverManagerSingleton {
+        private static final DBConnection INSTANCE = new DBConnectionDriverManager();
+    }
+
+    public static DBConnection getInstance() {
+        return DBConnectionDriverManagerSingleton.INSTANCE;
+    }
 
     @Override
     public Connection getConnection() throws SQLException {

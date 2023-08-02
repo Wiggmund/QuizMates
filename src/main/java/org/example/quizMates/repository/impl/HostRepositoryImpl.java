@@ -1,7 +1,7 @@
 package org.example.quizMates.repository.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnection;
+import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.host.CreateHostDto;
 import org.example.quizMates.dto.host.UpdateHostDto;
 import org.example.quizMates.exception.DBInternalException;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class HostRepositoryImpl implements HostRepository {
     private static final String ID_COL = "id";
     private static final String FIRST_NAME_COL = "first_name";
@@ -33,8 +32,19 @@ public class HostRepositoryImpl implements HostRepository {
             TABLE_NAME, ID_COL);
     private static final String SELECT_BY_FIRST_NAME_LAST_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ? AND %s = ?",
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL);
-
     private final DBConnection dbConnection;
+
+    private HostRepositoryImpl() {
+        this.dbConnection = DBConnectionDriverManager.getInstance();
+    }
+
+    private static class HostRepositorySingleton {
+        private static final HostRepository INSTANCE = new HostRepositoryImpl();
+    }
+
+    public static HostRepository getInstance() {
+        return HostRepositorySingleton.INSTANCE;
+    }
 
     @Override
     public Optional<Host> findById(Long id) {
