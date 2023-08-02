@@ -1,7 +1,7 @@
 package org.example.quizMates.repository.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnection;
+import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.pair.CreatePairDto;
 import org.example.quizMates.dto.pair.UpdatePairDto;
 import org.example.quizMates.exception.DBInternalException;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class PairRepositoryImpl implements PairRepository {
     private final DBConnection dbConnection;
     private final static String TABLE_NAME = "pairs";
@@ -35,6 +34,18 @@ public class PairRepositoryImpl implements PairRepository {
     private final static String BY_STUDENTA_AND_STUDENTB_SQL = String.format(
             "SELECT * FROM %s WHERE %s IN (?, ?) AND %s IN (?, ?)",
             TABLE_NAME, STUDENT_A_COL, STUDENT_B_COL);
+
+    private PairRepositoryImpl() {
+        this.dbConnection = DBConnectionDriverManager.getInstance();
+    }
+
+    private static class PairRepositorySingleton {
+        private static final PairRepository INSTANCE = new PairRepositoryImpl();
+    }
+
+    public static PairRepository getInstance() {
+        return PairRepositorySingleton.INSTANCE;
+    }
 
     @Override
     public Optional<Pair> findByStudentAAndStudentB(Long studentA, Long studentB) {

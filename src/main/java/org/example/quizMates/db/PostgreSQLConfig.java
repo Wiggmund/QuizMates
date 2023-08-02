@@ -10,7 +10,7 @@ public class PostgreSQLConfig implements DBConfig {
     private final String password;
     private final String driver;
 
-    public PostgreSQLConfig() {
+    private PostgreSQLConfig() {
         try(InputStream source = getClass().getClassLoader().getResourceAsStream("application.properties")) {
             Properties props = new Properties();
             props.load(source);
@@ -22,6 +22,14 @@ public class PostgreSQLConfig implements DBConfig {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static class PostgreSQlConfigSingleton {
+        private static final DBConfig INSTANCE = new PostgreSQLConfig();
+    }
+
+    public static DBConfig getInstance() {
+        return PostgreSQlConfigSingleton.INSTANCE;
     }
 
     @Override

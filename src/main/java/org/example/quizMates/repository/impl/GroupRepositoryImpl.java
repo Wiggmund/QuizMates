@@ -1,7 +1,7 @@
 package org.example.quizMates.repository.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnection;
+import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.group.CreateGroupDto;
 import org.example.quizMates.dto.group.UpdateGroupDto;
 import org.example.quizMates.exception.DBInternalException;
@@ -15,10 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class GroupRepositoryImpl implements GroupRepository {
     private final DBConnection dbConnection;
-    private final static String TABLE_NAME = "Group";
+    private final static String TABLE_NAME = "groups";
     private final static String ID_COL = "id";
     private final static String STUDENT_ID_COL = "student_id";
     private final static String NAME_COL = "name";
@@ -31,6 +30,18 @@ public class GroupRepositoryImpl implements GroupRepository {
             TABLE_NAME, STUDENT_ID_COL, NAME_COL, ID_COL);
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
+
+    private GroupRepositoryImpl() {
+        this.dbConnection = DBConnectionDriverManager.getInstance();
+    }
+
+    private static class GroupRepositorySingleton {
+        private static final GroupRepository INSTANCE = new GroupRepositoryImpl();
+    }
+
+    public static GroupRepository getInstance() {
+        return GroupRepositorySingleton.INSTANCE;
+    }
 
     @Override
     public Optional<Group> findById(Long id) {

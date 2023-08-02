@@ -1,7 +1,7 @@
 package org.example.quizMates.repository.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnection;
+import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.student.CreateStudentDto;
 import org.example.quizMates.dto.student.UpdateStudentDto;
 import org.example.quizMates.exception.DBInternalException;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class StudentRepositoryImpl implements StudentRepository {
     private final DBConnection dbConnection;
     private final static String TABLE_NAME = "students";
@@ -32,6 +31,20 @@ public class StudentRepositoryImpl implements StudentRepository {
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL, ID_COL);
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
+    private final static String SELECT_BY_FIRST_AND_LAST_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ? AND %s = ?",
+            TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL);
+
+    private StudentRepositoryImpl() {
+        this.dbConnection = DBConnectionDriverManager.getInstance();
+    }
+
+    private static class StudentRepositorySingleton {
+        private static final StudentRepository INSTANCE = new StudentRepositoryImpl();
+    }
+
+    public static StudentRepository getInstance() {
+        return StudentRepositorySingleton.INSTANCE;
+    }
 
     @Override
     public Optional<Student> findById(Long id) {
@@ -99,7 +112,29 @@ public class StudentRepositoryImpl implements StudentRepository {
 
     @Override
     public Optional<Student> findByFirstNameAndLastName(String firstName, String lastName) {
-        return Optional.empty();
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_BY_FIRST_AND_LAST_NAME_SQL)
+        ) {
+            statement.setString(1, firstName);
+            statement.setString(2, lastName);
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Student fetchedStudent = Student.builder()
+                            .id(resultSet.getLong(ID_COL))
+                            .firstName(resultSet.getString(FIRST_NAME_COL))
+                            .lastName(resultSet.getString(LAST_NAME_COL))
+                            .build();
+
+                    return Optional.of(fetchedStudent);
+                }
+
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 
     @Override
