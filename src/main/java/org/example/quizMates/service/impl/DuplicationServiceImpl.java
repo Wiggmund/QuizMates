@@ -1,16 +1,31 @@
 package org.example.quizMates.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.repository.*;
+import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.DuplicationService;
 
-@RequiredArgsConstructor
+
 public class DuplicationServiceImpl implements DuplicationService {
     private final StudentRepository studentRepository;
     private final HostRepository hostRepository;
     private final SessionRepository sessionRepository;
     private final GroupRepository groupRepository;
     private final PairRepository pairRepository;
+
+    private DuplicationServiceImpl() {
+        this.studentRepository = StudentRepositoryImpl.getInstance();
+        this.hostRepository = HostRepositoryImpl.getInstance();
+        this.sessionRepository = SessionRepositoryImpl.getInstance();
+        this.groupRepository = GroupRepositoryImpl.getInstance();
+        this.pairRepository = PairRepositoryImpl.getInstance();
+    }
+
+    private static class DuplicationServiceSingleton {
+        private static final DuplicationService INSTANCE = new DuplicationServiceImpl();
+    }
+    public static DuplicationService getInstance() {
+        return DuplicationServiceSingleton.INSTANCE;
+    }
 
     @Override
     public boolean doTheSameStudentExist(String firstName, String lastName) {

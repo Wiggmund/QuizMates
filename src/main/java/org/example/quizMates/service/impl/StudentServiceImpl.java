@@ -1,21 +1,33 @@
 package org.example.quizMates.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.dto.student.CreateStudentDto;
 import org.example.quizMates.dto.student.UpdateStudentDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Student;
 import org.example.quizMates.repository.StudentRepository;
+import org.example.quizMates.repository.impl.StudentRepositoryImpl;
 import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.StudentService;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final DuplicationService duplicationService;
     private final static String STUDENT_NOT_FOUND = "Student with id %s not found";
+
+    private StudentServiceImpl() {
+        this.studentRepository = StudentRepositoryImpl.getInstance();
+        this.duplicationService = DuplicationServiceImpl.getInstance();
+    }
+
+    private static class StudentServiceSingleton {
+        private static final StudentService INSTANCE = new StudentServiceImpl();
+    }
+
+    public static StudentService getInstance() {
+        return StudentServiceSingleton.INSTANCE;
+    }
 
     @Override
     public Student findById(Long id) {

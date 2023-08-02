@@ -1,7 +1,7 @@
 package org.example.quizMates.repository.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnection;
+import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.session.CreateSessionDto;
 import org.example.quizMates.dto.session.UpdateSessionDto;
 import org.example.quizMates.exception.DBInternalException;
@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class SessionRepositoryImpl implements SessionRepository {
     private static final String TABLE_NAME = "sessions";
     private final static String ID_COL = "id";
@@ -35,6 +34,18 @@ public class SessionRepositoryImpl implements SessionRepository {
     private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE id = ?", TABLE_NAME);
 
     private final DBConnection dbConnection;
+
+    private SessionRepositoryImpl() {
+        this.dbConnection = DBConnectionDriverManager.getInstance();
+    }
+
+    private static class SessionRepositorySingleton {
+        private static final SessionRepository INSTANCE = new SessionRepositoryImpl();
+    }
+
+    public static SessionRepository getInstance() {
+        return SessionRepositorySingleton.INSTANCE;
+    }
 
     @Override
     public Optional<Session> findById(Long id) {

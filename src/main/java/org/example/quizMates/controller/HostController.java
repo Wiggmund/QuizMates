@@ -7,16 +7,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.quizMates.db.DBConnectionDriverManager;
-import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.dto.host.CreateHostDto;
 import org.example.quizMates.dto.host.UpdateHostDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Host;
-import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.HostService;
-import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.HostServiceImpl;
 
 import java.io.IOException;
@@ -30,17 +26,8 @@ public class HostController extends HttpServlet {
     private static final Gson gson = new Gson();
     private static final String ID_REQ_PARAM = "id";
 
-
     public HostController() {
-        this(new HostServiceImpl(
-                new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                new DuplicationServiceImpl(
-                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
-        );
+        this(HostServiceImpl.getInstance());
     }
 
     @Override

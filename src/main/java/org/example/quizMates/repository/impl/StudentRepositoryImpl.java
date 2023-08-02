@@ -1,7 +1,7 @@
 package org.example.quizMates.repository.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.quizMates.db.DBConnection;
+import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.student.CreateStudentDto;
 import org.example.quizMates.dto.student.UpdateStudentDto;
 import org.example.quizMates.exception.DBInternalException;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class StudentRepositoryImpl implements StudentRepository {
     private final DBConnection dbConnection;
     private final static String TABLE_NAME = "students";
@@ -32,6 +31,18 @@ public class StudentRepositoryImpl implements StudentRepository {
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL, ID_COL);
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
+
+    private StudentRepositoryImpl() {
+        this.dbConnection = DBConnectionDriverManager.getInstance();
+    }
+
+    private static class StudentRepositorySingleton {
+        private static final StudentRepository INSTANCE = new StudentRepositoryImpl();
+    }
+
+    public static StudentRepository getInstance() {
+        return StudentRepositorySingleton.INSTANCE;
+    }
 
     @Override
     public Optional<Student> findById(Long id) {

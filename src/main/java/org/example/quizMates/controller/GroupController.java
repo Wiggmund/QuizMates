@@ -7,8 +7,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.quizMates.db.DBConnectionDriverManager;
-import org.example.quizMates.db.PostgreSQLConfig;
 
 import org.example.quizMates.dto.group.CreateGroupDto;
 import org.example.quizMates.dto.group.UpdateGroupDto;
@@ -16,9 +14,7 @@ import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Group;
 
-import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.GroupService;
-import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.GroupServiceImpl;
 
 import java.io.IOException;
@@ -33,15 +29,7 @@ public class GroupController extends HttpServlet {
     private final static String ID_REQ_PARAM = "id";
 
     public GroupController() {
-        this(new GroupServiceImpl(
-                new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                new DuplicationServiceImpl(
-                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
-        );
+        this(GroupServiceImpl.gteInstance());
     }
 
     @Override

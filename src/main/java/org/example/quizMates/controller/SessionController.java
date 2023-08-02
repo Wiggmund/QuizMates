@@ -8,20 +8,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.quizMates.db.DBConnectionDriverManager;
-import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.dto.session.CreateSessionDto;
 import org.example.quizMates.dto.session.UpdateSessionDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Session;
-import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.LocalDateTimeAdapter;
 import org.example.quizMates.service.SessionService;
-import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.SessionServiceImpl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
@@ -38,15 +33,7 @@ public class SessionController extends HttpServlet {
             .create();
 
     public SessionController() {
-        this(new SessionServiceImpl(
-                new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                new DuplicationServiceImpl(
-                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
-                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
-        );
+        this(SessionServiceImpl.getInstance());
     }
 
     @Override
