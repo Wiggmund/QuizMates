@@ -14,4 +14,8 @@ public class Student {
     private String firstName;
     private String lastName;
     private Long groupId;
+
+    public String getFullName() {
+        return String.format("%s %s", firstName, lastName);
+    }
 }

@@ -58,6 +58,7 @@ public class StudentRepositoryImpl implements StudentRepository {
                             .id(resultSet.getLong(ID_COL))
                             .firstName(resultSet.getString(FIRST_NAME_COL))
                             .lastName(resultSet.getString(LAST_NAME_COL))
+                            .groupId(resultSet.getLong(GROUP_ID_COL))
                             .build();
 
                     return Optional.of(fetchedStudent);

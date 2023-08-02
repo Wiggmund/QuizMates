@@ -7,7 +7,7 @@ import org.example.quizMates.model.Student;
 import java.util.List;
 
 public interface GroupStudentRepository {
-    List<Student> getAllGroupStudents();
+    List<Student> getAllGroupStudents(Long id);
     void addStudentToGroup(AddStudentToGroupDto dto);
     void removeStudentFromGroup(RemoveStudentFromGroupDto dto);
 }
