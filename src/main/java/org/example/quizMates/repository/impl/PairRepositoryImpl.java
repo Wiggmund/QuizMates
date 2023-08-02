@@ -32,21 +32,48 @@ public class PairRepositoryImpl implements PairRepository {
             TABLE_NAME, STUDENT_A_COL, STUDENT_B_COL, ID_COL);
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
+    private final static String BY_STUDENTA_AND_STUDENTB_SQL = String.format(
+            "SELECT * FROM %s WHERE %s IN (?, ?) AND %s IN (?, ?)",
+            TABLE_NAME, STUDENT_A_COL, STUDENT_B_COL);
 
     @Override
     public Optional<Pair> findByStudentAAndStudentB(Long studentA, Long studentB) {
-        return Optional.empty();
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(BY_STUDENTA_AND_STUDENTB_SQL)
+        ) {
+            preparedStatement.setLong(1, studentA);
+            preparedStatement.setLong(2, studentB);
+            preparedStatement.setLong(3, studentB);
+            preparedStatement.setLong(4, studentA);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    Long studentIdA = resultSet.getLong(STUDENT_A_COL);
+                    Long studentIdB = resultSet.getLong(STUDENT_B_COL);
+                    Pair pair = Pair.builder()
+                            .studentA(studentIdA)
+                            .studentB(studentIdB)
+                            .build();
+                    return Optional.of(pair);
+                }
+                return Optional.empty();
+            }
+        } catch (SQLException ex) {
+            throw new DBInternalException(ex.getMessage());
+        }
     }
 
     @Override
     public void createPair(CreatePairDto dto) {
-        try (Connection connection = dbConnection.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(CREATE_SQL);
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(CREATE_SQL)
         ) {
             preparedStatement.setLong(1, dto.getStudentA());
             preparedStatement.setLong(2, dto.getStudentB());
             preparedStatement.executeUpdate();
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             throw new DBInternalException(ex.getMessage());
         }
     }
@@ -54,32 +81,32 @@ public class PairRepositoryImpl implements PairRepository {
     @Override
     public void updatePair(UpdatePairDto dto) {
         try (
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)
         ) {
             preparedStatement.setLong(1, dto.getId());
             preparedStatement.setLong(2, dto.getStudentA());
             preparedStatement.setLong(3, dto.getStudentB());
             preparedStatement.executeUpdate();
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             throw new DBInternalException(ex.getMessage());
         }
     }
 
     @Override
     public List<Pair> findAll() {
-        try(
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_SQL);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_SQL);
+                ResultSet resultSet = preparedStatement.executeQuery()
         ) {
             List<Pair> allPairs = new ArrayList<>();
 
             while (resultSet.next()) {
                 Pair pair = Pair.builder()
                         .id(resultSet.getLong(ID_COL))
-                        .studentA(resultSet.getString(STUDENT_A_COL))
-                        .studentB(resultSet.getString(STUDENT_B_COL))
+                        .studentA(resultSet.getLong(STUDENT_A_COL))
+                        .studentB(resultSet.getLong(STUDENT_B_COL))
                         .build();
 
                 allPairs.add(pair);
@@ -93,8 +120,8 @@ public class PairRepositoryImpl implements PairRepository {
     @Override
     public Optional<Pair> findById(Long id) {
         try (
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL);
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL)
         ) {
             preparedStatement.setLong(1, id);
 
@@ -102,8 +129,8 @@ public class PairRepositoryImpl implements PairRepository {
                 if (resultSet.next()) {
                     Pair pair = Pair.builder()
                             .id(resultSet.getLong(ID_COL))
-                            .studentA(resultSet.getString(STUDENT_A_COL))
-                            .studentB(resultSet.getString(STUDENT_B_COL))
+                            .studentA(resultSet.getLong(STUDENT_A_COL))
+                            .studentB(resultSet.getLong(STUDENT_B_COL))
                             .build();
 
                     return Optional.of(pair);
@@ -118,8 +145,8 @@ public class PairRepositoryImpl implements PairRepository {
     @Override
     public void deleteById(Long id) {
         try (
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)
         ) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
