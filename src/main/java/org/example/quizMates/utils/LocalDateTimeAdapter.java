@@ -1,4 +1,4 @@
-package org.example.quizMates.service;
+package org.example.quizMates.utils;
 
 import com.google.gson.*;
 import java.lang.reflect.Type;

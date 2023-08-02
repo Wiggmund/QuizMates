@@ -1,7 +1,6 @@
 package org.example.quizMates.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,14 +13,11 @@ import org.example.quizMates.dto.session.UpdateSessionDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Session;
-import org.example.quizMates.service.LocalDateTimeAdapter;
 import org.example.quizMates.service.SessionService;
 import org.example.quizMates.service.impl.SessionServiceImpl;
 import org.example.quizMates.utils.ControllerHelper;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @WebServlet("/sessions")
