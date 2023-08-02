@@ -31,6 +31,8 @@ public class HostRepositoryImpl implements HostRepository {
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL, ID_COL);
     private static final String DELETE_HOST_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
+    private static final String SELECT_BY_FIRST_NAME_LAST_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ? AND %s = ?",
+            TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL);
 
     private final DBConnection dbConnection;
 
@@ -100,7 +102,29 @@ public class HostRepositoryImpl implements HostRepository {
 
     @Override
     public Optional<Host> findByFirstNameAndLastName(String firstName, String lastName) {
-        return Optional.empty();
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(SELECT_BY_FIRST_NAME_LAST_NAME_SQL)
+        ) {
+            ps.setString(1, firstName);
+            ps.setString(2, lastName);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    Host host = Host.builder()
+                            .id(resultSet.getLong(ID_COL))
+                            .firstName(resultSet.getString(FIRST_NAME_COL))
+                            .lastName(resultSet.getString(LAST_NAME_COL))
+                            .build();
+
+                    return Optional.of(host);
+                }
+
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 
     @Override
