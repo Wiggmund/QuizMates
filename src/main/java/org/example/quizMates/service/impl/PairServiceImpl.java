@@ -16,7 +16,8 @@ public class PairServiceImpl implements PairService {
     private final PairRepository pairRepository;
     private final DuplicationService duplicationService;
 
-    private final static String PAIR_NOT_FOUND= "Pair with id %s not found";
+    private final static String PAIR_NOT_FOUND = "Pair with id %s not found";
+    private final static String THE_SAME_PAIR_EXIST = "The same pair with studentId %s and studentId %s has already existed";
 
     @Override
     public Pair findById(Long id) {
@@ -37,11 +38,19 @@ public class PairServiceImpl implements PairService {
 
     @Override
     public void createPair(CreatePairDto dto) {
+        boolean theSamePairExist = duplicationService.doTheSamePairExist(dto.getStudentA(), dto.getStudentB());
+        if (theSamePairExist) {
+            throw new ResourceNotFoundException(String.format(THE_SAME_PAIR_EXIST, dto.getStudentA(), dto.getStudentB()));
+        }
         pairRepository.createPair(dto);
     }
 
     @Override
     public void updatePair(UpdatePairDto dto) {
+        boolean theSamePairExist = duplicationService.doTheSamePairExist(dto.getStudentA(), dto.getStudentB());
+        if (theSamePairExist) {
+            throw new ResourceNotFoundException(String.format(THE_SAME_PAIR_EXIST, dto.getStudentA(), dto.getStudentB()));
+        }
         findById(dto.getId());
         pairRepository.updatePair(dto);
     }
