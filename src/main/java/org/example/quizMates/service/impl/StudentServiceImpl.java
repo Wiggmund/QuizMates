@@ -16,8 +16,7 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final DuplicationService duplicationService;
     private final static String STUDENT_NOT_FOUND = "Student with id %s not found";
-    private final static String STUDENT_DUPLICATE_NAME = "Student with firstName %s and lastName %s already exists";
-
+    private final static String STUDENT_DUPLICATE_EXCEPTION = "Student with firstName %s and lastName %s already exists";
 
     @Override
     public Student findById(Long id) {
@@ -39,7 +38,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void createStudent(CreateStudentDto dto) {
         if (duplicationService.doTheSameStudentExist(dto.getFirstName(), dto.getLastName())) {
-            throw new ResourceNotFoundException(String.format(STUDENT_DUPLICATE_NAME,
+            throw new ResourceNotFoundException(String.format(STUDENT_DUPLICATE_EXCEPTION,
                     dto.getFirstName(), dto.getLastName()));
         }
         studentRepository.createStudent(dto);
@@ -57,7 +56,7 @@ public class StudentServiceImpl implements StudentService {
 
             if (doTheSameStudentExist) {
                 throw new ResourceNotFoundException(
-                        String.format(STUDENT_DUPLICATE_NAME, dto.getFirstName(), dto.getLastName()));
+                        String.format(STUDENT_DUPLICATE_EXCEPTION, dto.getFirstName(), dto.getLastName()));
             }
         }
         studentRepository.updateStudent(dto);

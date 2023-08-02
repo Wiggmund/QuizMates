@@ -32,7 +32,7 @@ public class StudentRepositoryImpl implements StudentRepository {
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL, ID_COL);
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
-    private final static String SELECT_BY_FIRST_NAME_LAST_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ? AND %s = ?",
+    private final static String SELECT_BY_FIRST_AND_LAST_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ? AND %s = ?",
             TABLE_NAME, FIRST_NAME_COL, LAST_NAME_COL);
 
     @Override
@@ -103,7 +103,7 @@ public class StudentRepositoryImpl implements StudentRepository {
     public Optional<Student> findByFirstNameAndLastName(String firstName, String lastName) {
         try (
                 Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SELECT_BY_FIRST_NAME_LAST_NAME_SQL)
+                PreparedStatement statement = connection.prepareStatement(SELECT_BY_FIRST_AND_LAST_NAME_SQL)
         ) {
             statement.setString(1, firstName);
             statement.setString(2, lastName);
