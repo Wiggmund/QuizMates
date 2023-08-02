@@ -8,10 +8,7 @@ import org.example.quizMates.exception.DBInternalException;
 import org.example.quizMates.model.Student;
 import org.example.quizMates.repository.StudentRepository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +19,7 @@ public class StudentRepositoryImpl implements StudentRepository {
     private final static String ID_COL = "id";
     private final static String FIRST_NAME_COL = "first_name";
     private final static String LAST_NAME_COL = "last_name";
+    private final static String GROUP_ID_COL = "group_id";
     private final static String SELECT_BY_ID_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
     private final static String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
@@ -86,6 +84,7 @@ public class StudentRepositoryImpl implements StudentRepository {
                         .id(resultSet.getLong(ID_COL))
                         .firstName(resultSet.getString(FIRST_NAME_COL))
                         .lastName(resultSet.getString(LAST_NAME_COL))
+                        .groupId(resultSet.getLong(GROUP_ID_COL))
                         .build();
 
                 students.add(fetchedStudent);
@@ -125,6 +124,7 @@ public class StudentRepositoryImpl implements StudentRepository {
                             .id(resultSet.getLong(ID_COL))
                             .firstName(resultSet.getString(FIRST_NAME_COL))
                             .lastName(resultSet.getString(LAST_NAME_COL))
+                            .groupId(resultSet.getLong(GROUP_ID_COL))
                             .build();
 
                     return Optional.of(fetchedStudent);

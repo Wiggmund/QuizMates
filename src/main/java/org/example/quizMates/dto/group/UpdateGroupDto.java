@@ -12,5 +12,4 @@ import lombok.ToString;
 public class UpdateGroupDto {
     private Long id;
     private String name;
-    private String studentId;
 }
