@@ -97,6 +97,11 @@ public class GroupRepositoryImpl implements GroupRepository {
     }
 
     @Override
+    public Optional<Group> findByName(String name) {
+        return Optional.empty();
+    }
+
+    @Override
     public void createGroup(CreateGroupDto dto) {
         try(
             Connection connection = dbConnection.getConnection();

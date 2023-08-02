@@ -6,6 +6,7 @@ import org.example.quizMates.dto.student.UpdateStudentDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Student;
 import org.example.quizMates.repository.StudentRepository;
+import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.StudentService;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
+    private final DuplicationService duplicationService;
     private final static String STUDENT_NOT_FOUND = "Student with id %s not found";
 
     @Override

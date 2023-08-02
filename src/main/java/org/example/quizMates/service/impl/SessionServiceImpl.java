@@ -6,6 +6,7 @@ import org.example.quizMates.dto.session.UpdateSessionDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Session;
 import org.example.quizMates.repository.SessionRepository;
+import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.SessionService;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
+    private final DuplicationService duplicationService;
     private final static String SESSION_NOT_FOUND = "Session with id %s not found";
 
     @Override

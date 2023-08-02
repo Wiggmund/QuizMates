@@ -30,6 +30,11 @@ public class PairRepositoryImpl implements PairRepository {
     }
 
     @Override
+    public Optional<Pair> findByStudentAAndStudentB(Long studentA, Long studentB) {
+        return Optional.empty();
+    }
+
+    @Override
     public void createPair(CreatePairDto dto) {
 
     }

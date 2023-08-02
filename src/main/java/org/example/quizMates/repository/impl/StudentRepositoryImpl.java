@@ -98,6 +98,11 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
+    public Optional<Student> findByFirstNameAndLastName(String firstName, String lastName) {
+        return Optional.empty();
+    }
+
+    @Override
     public void createStudent(CreateStudentDto dto) {
         try(
             Connection connection = dbConnection.getConnection();

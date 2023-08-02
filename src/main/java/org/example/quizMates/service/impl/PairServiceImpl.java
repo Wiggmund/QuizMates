@@ -5,6 +5,7 @@ import org.example.quizMates.dto.pair.CreatePairDto;
 import org.example.quizMates.dto.pair.UpdatePairDto;
 import org.example.quizMates.model.Pair;
 import org.example.quizMates.repository.PairRepository;
+import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.PairService;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PairServiceImpl implements PairService {
     private final PairRepository pairRepository;
+    private final DuplicationService duplicationService;
 
     @Override
     public Pair findById(Long aLong) {
