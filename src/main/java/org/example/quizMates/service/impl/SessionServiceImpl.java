@@ -15,6 +15,8 @@ public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
     private final DuplicationService duplicationService;
     private final static String SESSION_NOT_FOUND = "Session with id %s not found";
+    private final static String SESSION_DUPLICATE_TITLE = "Session with title %s already exists";
+
 
     private SessionServiceImpl() {
         this.sessionRepository = SessionRepositoryImpl.getInstance();
@@ -48,12 +50,27 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void createSession(CreateSessionDto dto) {
+        if (duplicationService.doTheSameSessionExist(dto.getTitle())) {
+            throw new ResourceNotFoundException(String.format(SESSION_DUPLICATE_TITLE,
+                    dto.getTitle()));
+        }
         sessionRepository.createSession(dto);
     }
 
     @Override
     public void updateSession(UpdateSessionDto dto) {
-        findById(dto.getId());
-        sessionRepository.updateSession(dto);
+        Session session = findById(dto.getId());
+
+        boolean doTitleTheSame = dto.getTitle().equalsIgnoreCase(session.getTitle());
+
+        if (!doTitleTheSame) {
+            boolean doTheSameSessionExist = duplicationService.doTheSameSessionExist(dto.getTitle());
+
+            if (doTheSameSessionExist) {
+                throw new ResourceNotFoundException(
+                        String.format(SESSION_DUPLICATE_TITLE, dto.getTitle()));
+            }
+            sessionRepository.updateSession(dto);
+        }
     }
 }
