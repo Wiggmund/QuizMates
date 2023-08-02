@@ -16,8 +16,9 @@ import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Group;
 
-import org.example.quizMates.repository.impl.GroupRepositoryImpl;
+import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.GroupService;
+import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.GroupServiceImpl;
 
 import java.io.IOException;
@@ -33,9 +34,14 @@ public class GroupController extends HttpServlet {
 
     public GroupController() {
         this(new GroupServiceImpl(
-                new GroupRepositoryImpl(
-                        new DBConnectionDriverManager(
-                                new PostgreSQLConfig()))));
+                new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                new DuplicationServiceImpl(
+                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
+        );
     }
 
     @Override

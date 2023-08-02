@@ -14,8 +14,9 @@ import org.example.quizMates.dto.host.UpdateHostDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Host;
-import org.example.quizMates.repository.impl.HostRepositoryImpl;
+import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.HostService;
+import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.HostServiceImpl;
 
 import java.io.IOException;
@@ -32,9 +33,14 @@ public class HostController extends HttpServlet {
 
     public HostController() {
         this(new HostServiceImpl(
-                new HostRepositoryImpl(
-                        new DBConnectionDriverManager(
-                                new PostgreSQLConfig()))));
+                new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                new DuplicationServiceImpl(
+                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
+        );
     }
 
     @Override

@@ -10,8 +10,9 @@ import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.db.PostgreSQLConfig;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
-import org.example.quizMates.repository.impl.PairRepositoryImpl;
+import org.example.quizMates.repository.impl.*;
 import org.example.quizMates.service.PairService;
+import org.example.quizMates.service.impl.DuplicationServiceImpl;
 import org.example.quizMates.service.impl.PairServiceImpl;
 
 import java.io.IOException;
@@ -24,9 +25,14 @@ public class PairController extends HttpServlet {
 
     public PairController() {
         this(new PairServiceImpl(
-                new PairRepositoryImpl(
-                        new DBConnectionDriverManager(
-                                new PostgreSQLConfig()))));
+                new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                new DuplicationServiceImpl(
+                        new StudentRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new HostRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new SessionRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new GroupRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig())),
+                        new PairRepositoryImpl(new DBConnectionDriverManager(new PostgreSQLConfig()))))
+        );
     }
 
     @Override
