@@ -4,6 +4,7 @@ import org.example.quizMates.db.DBConnection;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.group.AddStudentToGroupDto;
 import org.example.quizMates.dto.group.RemoveStudentFromGroupDto;
+import org.example.quizMates.enums.StudentTable;
 import org.example.quizMates.exception.DBInternalException;
 import org.example.quizMates.model.Student;
 import org.example.quizMates.repository.GroupStudentRepository;
@@ -16,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupStudentRepositoryImpl implements GroupStudentRepository {
-    private final static String STUDENT_TABLE_NAME = "students";
-    private final static String STUDENT_ID_COL = "id";
-    private final static String STUDENT_FIRST_NAME_COL = "first_name";
-    private final static String STUDENT_LAST_NAME_COL = "last_name";
-    private final static String STUDENT_GROUP_ID_COL = "group_id";
+    private final static String STUDENT_TABLE_NAME = StudentTable.TABLE_NAME.getName();
+    private final static String STUDENT_ID_COL = StudentTable.ID.getName();
+    private final static String STUDENT_FIRST_NAME_COL = StudentTable.FIRST_NAME.getName();
+    private final static String STUDENT_LAST_NAME_COL = StudentTable.LAST_NAME.getName();
+    private final static String STUDENT_GROUP_ID_COL = StudentTable.GROUP_ID.getName();
     private final static String SELECT_ALL_GROUP_STUDENTS_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
             STUDENT_TABLE_NAME, STUDENT_GROUP_ID_COL);
     private final static String ADD_STUDENT_TO_GROUP_SQL = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
