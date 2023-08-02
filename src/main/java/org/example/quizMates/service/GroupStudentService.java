@@ -7,7 +7,7 @@ import org.example.quizMates.model.Student;
 import java.util.List;
 
 public interface GroupStudentService {
-    List<Student> getAllGroupStudents();
+    List<Student> getAllGroupStudents(Long id);
     void addStudentToGroup(AddStudentToGroupDto dto);
     void removeStudentFromGroup(RemoveStudentFromGroupDto dto);
 }
