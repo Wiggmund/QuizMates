@@ -16,9 +16,7 @@ public class HostServiceImpl implements HostService {
     private final HostRepository hostRepository;
     private final DuplicationService duplicationService;
     private final static String HOST_NOT_FOUND = "Host with id %s not found";
-    private final static String HOST_DUPLICATE_NAME = "Host with name %s %s already exists";
-    private final static String HOST_OTHER_DUPLICATE_NAME = "Another host with name %s %s already exists";
-
+    private final static String HOST_DUPLICATE_NAME = "Host with firstName %s and lastName %s already exists";
 
     @Override
     public Host findById(Long id) {
@@ -48,13 +46,18 @@ public class HostServiceImpl implements HostService {
 
     @Override
     public void updateHost(UpdateHostDto dto) {
-        Host currentHost = findById(dto.getId());
+        Host host = findById(dto.getId());
 
-        Host duplicateHost = hostRepository.findByFirstNameAndLastName(dto.getFirstName(), dto.getLastName())
-                .orElse(null);
-        if (duplicateHost != null && !duplicateHost.getId().equals(currentHost.getId())) {
-            throw new ResourceNotFoundException(String.format(HOST_OTHER_DUPLICATE_NAME,
-                    dto.getFirstName(), dto.getLastName()));
+        boolean doFirstNameTheSame = dto.getFirstName().equalsIgnoreCase(host.getFirstName());
+        boolean doLastNameTheSame = dto.getLastName().equalsIgnoreCase(host.getLastName());
+
+        if (!doFirstNameTheSame || !doLastNameTheSame) {
+            boolean doTheSameHostExist = duplicationService.doTheSameHostExist(dto.getFirstName(), dto.getLastName());
+
+            if (doTheSameHostExist) {
+                throw new ResourceNotFoundException(
+                        String.format(HOST_DUPLICATE_NAME, dto.getFirstName(), dto.getLastName()));
+            }
         }
 
         hostRepository.updateHost(dto);
