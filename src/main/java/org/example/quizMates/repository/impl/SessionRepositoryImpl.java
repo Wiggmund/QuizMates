@@ -8,7 +8,6 @@ import org.example.quizMates.enums.SessionTable;
 import org.example.quizMates.exception.DBInternalException;
 import org.example.quizMates.model.Session;
 import org.example.quizMates.repository.SessionRepository;
-import org.example.quizMates.utils.RepositoryHelper;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             ps.setLong(1, id);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                return extractIfPresent(resultSet);
+                return extractSessionIfPresent(resultSet);
             }
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -95,7 +94,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             ps.setString(1, title);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                return extractIfPresent(resultSet);
+                return extractSessionIfPresent(resultSet);
             }
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -152,13 +151,23 @@ public class SessionRepositoryImpl implements SessionRepository {
         }
     }
 
-    private Optional<Session> extractIfPresent(ResultSet resultSet) throws SQLException {
+    private Optional<Session> extractSessionIfPresent(ResultSet resultSet) throws SQLException {
         if (resultSet.next()) {
-            Session fetchedSession = RepositoryHelper.extractEntity(resultSet, Session.class);
-
-            return Optional.of(fetchedSession);
+            return Optional.of(extractSession(resultSet));
         }
 
         return Optional.empty();
+    }
+
+    private Session extractSession(ResultSet resultSet) throws SQLException {
+        return Session.builder()
+                .id(resultSet.getLong(SessionTable.ID.getName()))
+                .title(resultSet.getString(SessionTable.TITLE.getName()))
+                .description(resultSet.getString(SessionTable.DESCRIPTION.getName()))
+                .date(resultSet.getTimestamp(SessionTable.DATE.getName()).toLocalDateTime())
+                .best_student(resultSet.getLong(SessionTable.BEST_STUDENT.getName()))
+                .best_group(resultSet.getLong(SessionTable.BEST_GROUP.getName()))
+                .status(resultSet.getBoolean(SessionTable.STATUS.getName()))
+                .build();
     }
 }
