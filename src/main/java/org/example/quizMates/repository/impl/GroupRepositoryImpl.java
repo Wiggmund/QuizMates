@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class GroupRepositoryImpl implements GroupRepository {
     private final DBConnection dbConnection;
-    private final static String TABLE_NAME = "Group";
+    private final static String TABLE_NAME = "groups";
     private final static String ID_COL = "id";
     private final static String STUDENT_ID_COL = "student_id";
     private final static String NAME_COL = "name";
