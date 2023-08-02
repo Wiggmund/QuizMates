@@ -4,6 +4,7 @@ import org.example.quizMates.db.DBConnection;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.group.CreateGroupDto;
 import org.example.quizMates.dto.group.UpdateGroupDto;
+import org.example.quizMates.enums.GroupTable;
 import org.example.quizMates.exception.DBInternalException;
 import org.example.quizMates.model.Group;
 import org.example.quizMates.repository.GroupRepository;
@@ -17,9 +18,9 @@ import java.util.Optional;
 
 public class GroupRepositoryImpl implements GroupRepository {
     private final DBConnection dbConnection;
-    private final static String TABLE_NAME = "groups";
-    private final static String ID_COL = "id";
-    private final static String NAME_COL = "name";
+    private final static String TABLE_NAME = GroupTable.TABLE_NAME.getName();
+    private final static String ID_COL = GroupTable.ID.getName();
+    private final static String NAME_COL = GroupTable.NAME.getName();
     private final static String SELECT_BY_ID_SQL = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
     private final static String SELECT_BY_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
             TABLE_NAME, NAME_COL);
@@ -44,6 +45,25 @@ public class GroupRepositoryImpl implements GroupRepository {
     }
 
     @Override
+    public List<Group> findAll() {
+        try(
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
+                ResultSet resultSet = statement.executeQuery()
+        ) {
+            List<Group> groups = new ArrayList<>();
+
+            while(resultSet.next()) {
+                groups.add(extractGroup(resultSet));
+            }
+
+            return groups;
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
     public Optional<Group> findById(Long id) {
         try(
             Connection connection = dbConnection.getConnection();
@@ -52,16 +72,7 @@ public class GroupRepositoryImpl implements GroupRepository {
             statement.setLong(1, id);
 
             try(ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    Group fetchedGroup = Group.builder()
-                            .id(resultSet.getLong(ID_COL))
-                            .name(resultSet.getString(NAME_COL))
-                            .build();
-
-                    return Optional.of(fetchedGroup);
-                }
-
-                return Optional.empty();
+                return extractGroupIfPresent(resultSet);
             }
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -69,24 +80,43 @@ public class GroupRepositoryImpl implements GroupRepository {
     }
 
     @Override
-    public List<Group> findAll() {
+    public Optional<Group> findByName(String name) {
         try(
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
-            ResultSet resultSet = statement.executeQuery()
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_BY_NAME_SQL)
         ) {
-            List<Group> groups = new ArrayList<>();
+            statement.setString(1, name);
 
-            while(resultSet.next()) {
-                Group fetchedGroup = Group.builder()
-                        .id(resultSet.getLong(ID_COL))
-                        .name(resultSet.getString(NAME_COL))
-                        .build();
-
-                groups.add(fetchedGroup);
+            try(ResultSet resultSet = statement.executeQuery()) {
+                return extractGroupIfPresent(resultSet);
             }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
 
-            return groups;
+    @Override
+    public void createGroup(CreateGroupDto dto) {
+        try(
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(CREATE_SQL)
+        ) {
+            statement.setString(1, dto.getName());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateGroup(UpdateGroupDto dto) {
+        try(
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+        ) {
+            statement.setString(1, dto.getName());
+            statement.setLong(3, dto.getId());
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }
@@ -105,55 +135,18 @@ public class GroupRepositoryImpl implements GroupRepository {
         }
     }
 
-    @Override
-    public Optional<Group> findByName(String name) {
-        try(
-                Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SELECT_BY_NAME_SQL)
-        ) {
-            statement.setString(1, name);
-
-            try(ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    Group fetchedGroup = Group.builder()
-                            .id(resultSet.getLong(ID_COL))
-                            .name(resultSet.getString(NAME_COL))
-                            .build();
-
-                    return Optional.of(fetchedGroup);
-                }
-
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            throw new DBInternalException(e.getMessage());
+    private Optional<Group> extractGroupIfPresent(ResultSet resultSet) throws SQLException {
+        if (resultSet.next()) {
+            return Optional.of(extractGroup(resultSet));
         }
+
+        return Optional.empty();
     }
 
-    @Override
-    public void createGroup(CreateGroupDto dto) {
-        try(
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(CREATE_SQL)
-        ) {
-            statement.setString(1, dto.getName());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DBInternalException(e.getMessage());
-        }
-    }
-
-    @Override
-    public void updateGroup(UpdateGroupDto dto) {
-        try(
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
-        ) {
-            statement.setString(1, dto.getName());
-            statement.setLong(3, dto.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DBInternalException(e.getMessage());
-        }
+    private Group extractGroup(ResultSet resultSet) throws SQLException {
+        return Group.builder()
+                .id(resultSet.getLong(ID_COL))
+                .name(resultSet.getString(NAME_COL))
+                .build();
     }
 }
