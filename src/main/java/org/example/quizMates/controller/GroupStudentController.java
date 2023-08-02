@@ -51,6 +51,7 @@ public class GroupStudentController extends HttpServlet {
         try {
             AddStudentToGroupDto addStudentToGroupDto = gson.fromJson(req.getReader(), AddStudentToGroupDto.class);
             groupStudentService.addStudentToGroup(addStudentToGroupDto);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             resp.setStatus(exceptionResponse.statusCode());
@@ -65,6 +66,7 @@ public class GroupStudentController extends HttpServlet {
         try {
             RemoveStudentFromGroupDto removeStudentFromGroupDto = gson.fromJson(req.getReader(), RemoveStudentFromGroupDto.class);
             groupStudentService.removeStudentFromGroup(removeStudentFromGroupDto);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             resp.setStatus(exceptionResponse.statusCode());

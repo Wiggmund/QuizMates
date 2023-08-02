@@ -19,6 +19,8 @@ public class GroupStudentServiceImpl implements GroupStudentService {
     private final GroupStudentRepository groupStudentRepository;
     private final StudentService studentService;
     private final GroupService groupService;
+    private final static String STUDENT_ALREADY_HAS_GROUP = "Student %s is already in group %s";
+    private final static String STUDENT_WRONG_GROUP = "Student %s is not in group %s";
 
     private GroupStudentServiceImpl() {
         this.groupStudentRepository = GroupStudentRepositoryImpl.getInstance();
@@ -42,10 +44,11 @@ public class GroupStudentServiceImpl implements GroupStudentService {
     @Override
     public void addStudentToGroup(AddStudentToGroupDto dto) {
         Student student = studentService.findById(dto.getStudentId());
-        groupService.findById(dto.getGroupId());
+        Group group = groupService.findById(dto.getGroupId());
 
-        if(student.getGroupId() != 0){
-            throw new ResourceAlreadyExistException();
+        if(student.getGroupId() != 0) {
+            throw new ResourceAlreadyExistException(String.format(STUDENT_ALREADY_HAS_GROUP,
+                    student.getFullName(), group.getName()));
         }
         groupStudentRepository.addStudentToGroup(dto);
     }
@@ -54,10 +57,12 @@ public class GroupStudentServiceImpl implements GroupStudentService {
     public void removeStudentFromGroup(RemoveStudentFromGroupDto dto) {
         Student student = studentService.findById(dto.getStudentId());
         Group group = groupService.findById(dto.getGroupId());
-        Long studentGroupId = student.getGroupId();
-        if(!Objects.equals(group.getId(), studentGroupId)){
-            throw new ResourceNotFoundException();
+
+        if(!Objects.equals(group.getId(), student.getGroupId())){
+            throw new ResourceNotFoundException(String.format(STUDENT_WRONG_GROUP,
+                    student.getFullName(), group.getName()));
         }
+
         groupStudentRepository.removeStudentFromGroup(dto);
     }
 }
