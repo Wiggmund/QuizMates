@@ -20,8 +20,9 @@ public class GroupRepositoryImpl implements GroupRepository {
     private final static String TABLE_NAME = "groups";
     private final static String ID_COL = "id";
     private final static String NAME_COL = "name";
-    private final static String SELECT_BY_ID_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
-            TABLE_NAME, ID_COL);
+    private final static String SELECT_BY_ID_SQL = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
+    private final static String SELECT_BY_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
+            TABLE_NAME, NAME_COL);
     private final static String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
     private final static String CREATE_SQL = String.format("INSERT INTO %s(%s) VALUES(?)",
             TABLE_NAME, NAME_COL);
@@ -106,7 +107,27 @@ public class GroupRepositoryImpl implements GroupRepository {
 
     @Override
     public Optional<Group> findByName(String name) {
-        return Optional.empty();
+        try(
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_BY_NAME_SQL)
+        ) {
+            statement.setString(1, name);
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Group fetchedGroup = Group.builder()
+                            .id(resultSet.getLong(ID_COL))
+                            .name(resultSet.getString(NAME_COL))
+                            .build();
+
+                    return Optional.of(fetchedGroup);
+                }
+
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
     }
 
     @Override

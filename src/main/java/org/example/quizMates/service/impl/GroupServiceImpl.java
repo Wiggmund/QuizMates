@@ -2,6 +2,7 @@ package org.example.quizMates.service.impl;
 
 import org.example.quizMates.dto.group.CreateGroupDto;
 import org.example.quizMates.dto.group.UpdateGroupDto;
+import org.example.quizMates.exception.ResourceAlreadyExistException;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Group;
 import org.example.quizMates.repository.GroupRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
     private final DuplicationService duplicationService;
+    private final static String GROUP_DUPLICATE_EXCEPTION = "Group with name %s already exist";
 
     private GroupServiceImpl() {
         this.groupRepository = GroupRepositoryImpl.getInstance();
@@ -48,11 +50,23 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void createGroup(CreateGroupDto dto) {
+        boolean doTheSameGroupExist = duplicationService.doTheSameGroupExist(dto.getName());
+
+        if (doTheSameGroupExist) {
+            throw new ResourceAlreadyExistException(String.format(GROUP_DUPLICATE_EXCEPTION, dto.getName()));
+        }
+
         groupRepository.createGroup(dto);
     }
 
     @Override
     public void updateGroup(UpdateGroupDto dto) {
+        boolean doTheSameGroupExist = duplicationService.doTheSameGroupExist(dto.getName());
+
+        if (doTheSameGroupExist) {
+            throw new ResourceAlreadyExistException(String.format(GROUP_DUPLICATE_EXCEPTION, dto.getName()));
+        }
+
         findById(dto.getId());
         groupRepository.updateGroup(dto);
     }
