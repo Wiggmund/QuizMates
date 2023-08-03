@@ -194,6 +194,7 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
 
     private SessionRecord extractSessionRecord(ResultSet resultSet) throws SQLException {
         return SessionRecord.builder()
+                .id((resultSet.getLong(SessionRecordTable.ID.getName())))
                 .sessionId((resultSet.getLong(SessionRecordTable.SESSION_ID.getName())))
                 .pairId(resultSet.getLong(SessionRecordTable.PAIR_ID.getName()))
                 .studentId(resultSet.getLong(SessionRecordTable.STUDENT_ID.getName()))
