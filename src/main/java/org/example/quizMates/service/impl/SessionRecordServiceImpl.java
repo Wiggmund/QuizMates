@@ -20,7 +20,6 @@ public class SessionRecordServiceImpl implements SessionRecordService {
     private final SessionService sessionService;
 
     private final static String SESSION_RECORD_NOT_FOUND = "Session record with id %s not found";
-    private final static String SESSION_RECORD_DUPLICATE = "Session record with title %s already exists";
 
     private SessionRecordServiceImpl() {
         this.sessionRecordRepository = SessionRecordRepositoryImpl.getInstance();

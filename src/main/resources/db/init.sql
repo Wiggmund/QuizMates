@@ -61,6 +61,4 @@ CREATE TABLE IF NOT EXISTS sessionsrecords (
      host_notes     TEXT,
      was_present    BOOLEAN NOT NULL,
      CONSTRAINT pk_sessions_records PRIMARY KEY (id)
---      PRIMARY KEY (session_id, pair_id, student_id, host_id)
-
 );
