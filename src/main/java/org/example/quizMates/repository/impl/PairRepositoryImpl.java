@@ -103,6 +103,29 @@ public class PairRepositoryImpl implements PairRepository {
     }
 
     @Override
+    public List<Pair> findPairsByIds(List<Long> ids) {
+        try (
+            Connection connection = dbConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(generateQuery(ids))
+        ) {
+            List<Pair> allPairs = new ArrayList<>();
+            for (int i = 0; i < ids.size(); i++) {
+                statement.setLong(i + 1, ids.get(i));
+            }
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    allPairs.add(extractPair(resultSet));
+                }
+
+                return allPairs;
+            }
+        } catch (SQLException ex) {
+            throw new DBInternalException(ex.getMessage());
+        }
+    }
+
+    @Override
     public void createPair(CreatePairDto dto) {
         try (
                 Connection connection = dbConnection.getConnection();
@@ -158,5 +181,19 @@ public class PairRepositoryImpl implements PairRepository {
                 .studentA(resultSet.getLong(STUDENT_A_COL))
                 .studentB(resultSet.getLong(STUDENT_B_COL))
                 .build();
+    }
+
+    private String generateQuery(List<Long> ids) {
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + ID_COL + " IN (";
+
+        for (int i = 0; i < ids.size(); i++) {
+            sql += "?"; // Добавляем placeholder для каждого ID
+            if (i < ids.size() - 1) {
+                sql += ",";
+            }
+        }
+        sql += ")";
+
+        return sql;
     }
 }

@@ -29,5 +29,8 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
     public List<Pair> generatePairs() {
         Session session = sessionService.getLastSession().get();
         List<SessionRecord> fetchedRecords = sessionRecordService.findBySessionId(session.getId());
+        List<Long> pairIds = fetchedRecords.stream().map(SessionRecord::getPairId).toList();
+
+        return null;
     }
 }
