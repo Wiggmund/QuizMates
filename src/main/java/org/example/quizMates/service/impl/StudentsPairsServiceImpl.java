@@ -1,12 +1,21 @@
 package org.example.quizMates.service.impl;
 
 import org.example.quizMates.model.Pair;
+import org.example.quizMates.model.Session;
+import org.example.quizMates.model.SessionRecord;
+import org.example.quizMates.service.SessionRecordService;
+import org.example.quizMates.service.SessionService;
 import org.example.quizMates.service.StudentsPairsService;
 
 import java.util.List;
 
 public class StudentsPairsServiceImpl implements StudentsPairsService {
-    private StudentsPairsServiceImpl() {}
+    private final SessionService sessionService;
+    private final SessionRecordService sessionRecordService;
+    private StudentsPairsServiceImpl() {
+        this.sessionService = SessionServiceImpl.getInstance();
+        this.sessionRecordService = SessionRecordServiceImpl.getInstance();
+    }
 
     private static class StudentPairServiceImplSingleton {
         private static final StudentsPairsService INSTANCE = new StudentsPairsServiceImpl();
@@ -18,6 +27,7 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
 
     @Override
     public List<Pair> generatePairs() {
-        return null;
+        Session session = sessionService.getLastSession().get();
+        List<SessionRecord> fetchedRecords = sessionRecordService.findBySessionId(session.getId());
     }
 }
