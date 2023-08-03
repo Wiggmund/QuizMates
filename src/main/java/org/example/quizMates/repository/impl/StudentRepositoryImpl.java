@@ -6,6 +6,7 @@ import org.example.quizMates.dto.student.CreateStudentDto;
 import org.example.quizMates.dto.student.UpdateStudentDto;
 import org.example.quizMates.enums.StudentTable;
 import org.example.quizMates.exception.DBInternalException;
+import org.example.quizMates.model.Pair;
 import org.example.quizMates.model.Student;
 import org.example.quizMates.repository.StudentRepository;
 
@@ -98,6 +99,29 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
+    public List<Student> findStudentsByIds(List<Long> ids) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(generateQuery(ids))
+        ) {
+            List<Student> students = new ArrayList<>();
+            for (int i = 0; i < ids.size(); i++) {
+                statement.setLong(i + 1, ids.get(i));
+            }
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    students.add(extractStudent(resultSet));
+                }
+
+                return students;
+            }
+        } catch (SQLException ex) {
+            throw new DBInternalException(ex.getMessage());
+        }
+    }
+
+    @Override
     public void createStudent(CreateStudentDto dto) {
         try(
                 Connection connection = dbConnection.getConnection();
@@ -154,5 +178,19 @@ public class StudentRepositoryImpl implements StudentRepository {
                 .lastName(resultSet.getString(StudentTable.LAST_NAME.getName()))
                 .groupId(resultSet.getLong(StudentTable.GROUP_ID.getName()))
                 .build();
+    }
+
+    private String generateQuery(List<Long> ids) {
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + ID_COL + " IN (";
+
+        for (int i = 0; i < ids.size(); i++) {
+            sql += "?"; // Добавляем placeholder для каждого ID
+            if (i < ids.size() - 1) {
+                sql += ",";
+            }
+        }
+        sql += ")";
+
+        return sql;
     }
 }

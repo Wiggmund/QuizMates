@@ -48,6 +48,11 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public List<Student> findStudentsByIds(List<Long> ids) {
+        return studentRepository.findStudentsByIds(ids);
+    }
+
+    @Override
     public void createStudent(CreateStudentDto dto) {
         if (duplicationService.doTheSameStudentExist(dto.getFirstName(), dto.getLastName())) {
             throw new ResourceNotFoundException(String.format(STUDENT_DUPLICATE_EXCEPTION,
