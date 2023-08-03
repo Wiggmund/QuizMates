@@ -106,12 +106,36 @@ public class PairRepositoryImpl implements PairRepository {
     public List<Pair> findPairsByIds(List<Long> ids) {
         try (
             Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(generateQuery(ids))
+            PreparedStatement statement = connection.prepareStatement(generateSQLToFetchPairsByIds(ids))
         ) {
             List<Pair> allPairs = new ArrayList<>();
-            for (int i = 0; i < ids.size(); i++) {
-                statement.setLong(i + 1, ids.get(i));
+            setLongPlaceholders(statement, ids);
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    allPairs.add(extractPair(resultSet));
+                }
+
+                return allPairs;
             }
+        } catch (SQLException ex) {
+            throw new DBInternalException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public List<Pair> findPairsByStudents(List<CreatePairDto> dtos) {
+        List<Long> studentsAIds = dtos.stream().map(CreatePairDto::getStudentA).toList();
+        List<Long> studentsBIds = dtos.stream().map(CreatePairDto::getStudentB).toList();
+
+        String SELECT_PAIRS_BY_STUDENTS_SQL = generateSQLToFetchPairsByStudents(studentsAIds, studentsBIds);
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_PAIRS_BY_STUDENTS_SQL)
+        ) {
+            List<Pair> allPairs = new ArrayList<>();
+            setLongPlaceholders(statement, studentsAIds);
+            setLongPlaceholders(statement, studentsBIds);
 
             try(ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -183,17 +207,44 @@ public class PairRepositoryImpl implements PairRepository {
                 .build();
     }
 
-    private String generateQuery(List<Long> ids) {
-        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + ID_COL + " IN (";
+    private String generateSQLToFetchPairsByIds(List<Long> ids) {
+        return "SELECT * FROM " +
+                TABLE_NAME +
+                " WHERE " +
+                ID_COL +
+                " IN(" +
+                generatePlaceholders(ids.size()) +
+                ")";
+    }
 
-        for (int i = 0; i < ids.size(); i++) {
-            sql += "?"; // Добавляем placeholder для каждого ID
-            if (i < ids.size() - 1) {
-                sql += ",";
+    private String generateSQLToFetchPairsByStudents(List<Long> studentsAIds, List<Long> studentsBIds) {
+        return "SELECT * FROM " +
+                TABLE_NAME +
+                " WHERE " +
+                STUDENT_A_COL +
+                " IN(" +
+                generatePlaceholders(studentsAIds.size()) +
+                ") AND " +
+                STUDENT_B_COL +
+                " IN(" +
+                generatePlaceholders(studentsBIds.size()) +
+                ")";
+    }
+
+    private String generatePlaceholders(int count) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            sb.append("?");
+            if (i < count - 1) {
+                sb.append(",");
             }
         }
-        sql += ")";
+        return sb.toString();
+    }
 
-        return sql;
+    private void setLongPlaceholders(PreparedStatement statement, List<Long> values) throws SQLException {
+        for (int i = 0; i < values.size(); i++) {
+            statement.setLong(i + 1, values.get(i));
+        }
     }
 }

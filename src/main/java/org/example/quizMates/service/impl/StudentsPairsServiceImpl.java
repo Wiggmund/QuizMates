@@ -35,9 +35,9 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
     public List<Pair> generatePairs() {
         final Long EMPTY = -1L;
         Session session = sessionService.getLastSession().get();
-        List<SessionRecord> fetchedRecords = sessionRecordService.findBySessionId(session.getId());
-        List<Long> pairIds = fetchedRecords.stream().map(SessionRecord::getPairId).toList();
-        List<Pair> pairsList = pairService.findPairsByIds(pairIds);
+        List<SessionRecord> fetchedRecordsForLastSession = sessionRecordService.findBySessionId(session.getId());
+        List<Long> lastSessionPairIds = fetchedRecordsForLastSession.stream().map(SessionRecord::getPairId).toList();
+        List<Pair> lastSessionPairsList = pairService.findPairsByIds(lastSessionPairIds);
 
 
         /*-------------------*/
@@ -49,8 +49,8 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
 
         /*-------------------*/
         Map<Long, Long> allStudentsWithPairLastSession = new HashMap<>();
-        Map<Long, Long> aStudents = pairsList.stream().collect(Collectors.toMap(Pair::getStudentA, Pair::getStudentB));
-        Map<Long, Long> bStudents = pairsList.stream().collect(Collectors.toMap(Pair::getStudentB, Pair::getStudentA));
+        Map<Long, Long> aStudents = lastSessionPairsList.stream().collect(Collectors.toMap(Pair::getStudentA, Pair::getStudentB));
+        Map<Long, Long> bStudents = lastSessionPairsList.stream().collect(Collectors.toMap(Pair::getStudentB, Pair::getStudentA));
 
         aStudents.forEach((key, value) -> allStudentsWithPairLastSession.merge(key, value, (a, b) -> {
             throw new IllegalArgumentException("Duplicated key");}));
@@ -68,6 +68,8 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
             allStudentsWithPossiblePair.put(currentStudent.getId(), possiblePairIds);
         }
 
+
+        /*-------------------*/
         List<CreatePairDto> resultDtos = new ArrayList<>();
         Map<Long, Long> takenStudents = new HashMap<>();
 
@@ -98,7 +100,48 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
                 }
             }
         });
+        /*-------------------*/
 
+
+
+        /*-------------------*/
+        List<Pair> allExistedPairs = pairService.findAll();
+        Map<Long, Long> asKeyStudentA = allExistedPairs.stream()
+                .collect(Collectors.toMap(Pair::getStudentA, Pair::getStudentB));
+        Map<Long, Long> asKeyStudentB = allExistedPairs.stream()
+                .collect(Collectors.toMap(Pair::getStudentB, Pair::getStudentA));
+
+        List<CreatePairDto> notExistedPairs = resultDtos.stream().filter((dto) -> {
+            /*
+             * A) Pair(studentA = 1, studentB = 2)
+             * B) Pair(studentA = 2, studentB = 1)
+             *
+             * Option A is obviously the same as option B. So we have to check both to filter
+             * */
+
+            /*
+             * Option A
+             * */
+            boolean doStudentAPresentAsStudentA = Objects.equals(asKeyStudentA.getOrDefault(dto.getStudentA(), EMPTY), EMPTY);
+            boolean doStudentBPresentAsStudentB = Objects.equals(asKeyStudentB.getOrDefault(dto.getStudentB(), EMPTY), EMPTY);
+            if (doStudentAPresentAsStudentA && doStudentBPresentAsStudentB) return true;
+
+            /*
+             * Option B
+             * */
+            boolean doStudentBPresentAsStudentA = Objects.equals(asKeyStudentA.getOrDefault(dto.getStudentB(), EMPTY), EMPTY);
+            boolean doStudentAPresentAsStudentB = Objects.equals(asKeyStudentB.getOrDefault(dto.getStudentA(), EMPTY), EMPTY);
+            if (doStudentBPresentAsStudentA && doStudentAPresentAsStudentB) return true;
+
+            return false;
+        }).toList();
+
+        if(!notExistedPairs.isEmpty()) {
+            for (CreatePairDto dto : notExistedPairs) {
+                pairService.createPair(dto);
+            }
+        }
+        /*-------------------*/
 
         return new ArrayList<>();
     }

@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface PairRepository extends CrudRepository<Pair, Long> {
     Optional<Pair> findByStudentAAndStudentB(Long studentA, Long studentB);
     List<Pair> findPairsByIds(List<Long> ids);
+    List<Pair> findPairsByStudents(List<CreatePairDto> dtos);
     void createPair(CreatePairDto dto);
     void updatePair(UpdatePairDto dto);
 }
