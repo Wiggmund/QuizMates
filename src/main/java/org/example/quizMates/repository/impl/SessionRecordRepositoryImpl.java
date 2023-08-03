@@ -16,6 +16,7 @@ import java.util.Optional;
 
 public class SessionRecordRepositoryImpl implements SessionRecordRepository{
     private static final String TABLE_NAME = SessionRecordTable.TABLE_NAME.getName();
+    private final static String ID_COL = SessionRecordTable.ID.getName();
     private final static String SESSION_ID_COL = SessionRecordTable.SESSION_ID.getName();
     private static final String PAIR_ID_COL = SessionRecordTable.PAIR_ID.getName();
     private final static String STUDENT_ID_COL = SessionRecordTable.STUDENT_ID.getName();
@@ -24,16 +25,16 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
     private final static String HOST_NOTES_COL = SessionRecordTable.HOST_NOTES.getName();
     private final static String WAS_PRESENT_COL = SessionRecordTable.WAS_PRESENT.getName();
     private static final String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
-    private static final String SELECT_SESSION_RECORD_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?, %s = ?, %s = ?, %s =?", TABLE_NAME,
-            SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL);
+    private static final String SELECT_SESSION_RECORD_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
+    private static final String SELECT_SESSION_RECORD_BY_STUDENT_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, STUDENT_ID_COL);
+    private static final String SELECT_SESSION_RECORD_BY_SESSION_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME,SESSION_ID_COL);
     private final static String CREATE_SESSION_RECORD_SQL = String.format(
-            "INSERT INTO %s (%s, %s, %s) VALUES(?,?,?)",
-            TABLE_NAME, SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL);
+            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES(?,?,?,?,?,?,?)",
+            TABLE_NAME, SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL, SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL);
     private final static String UPDATE_SQL = String.format(
-            "UPDATE %s SET %s = ?, %s = ?, %s = ?  WHERE %s = ?, %s = ?, %s = ?, %s =?",
-            TABLE_NAME, SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL, SESSION_ID_COL, PAIR_ID_COL,STUDENT_ID_COL,HOST_ID_COL);
-    private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?, %s = ?, %s = ?, %s =?", TABLE_NAME,
-            SESSION_ID_COL,PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL);
+            "UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?  WHERE %s = ?",
+            TABLE_NAME, SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL, SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL, ID_COL);
+    private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
 
     private final DBConnection dbConnection;
 
@@ -60,7 +61,6 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
 
             while (resultSet.next()) {
                 SessionRecord fetchedSessionRecord = extractSessionRecord(resultSet);
-
                 sessionRecords.add(fetchedSessionRecord);
             }
             return sessionRecords;
@@ -70,18 +70,61 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
     }
 
     @Override
-    public Optional<SessionRecord> findById(Long sessionId, Long pairId, Long studentId, Long hostId) {
+    public Optional<SessionRecord> findById(Long id) {
         try (
                 Connection connection = dbConnection.getConnection();
                 PreparedStatement ps = connection.prepareStatement(SELECT_SESSION_RECORD_BY_ID)
         ) {
-            ps.setLong(1, sessionId);
-            ps.setLong(2, pairId);
-            ps.setLong(3, studentId);
-            ps.setLong(4, hostId);
+            ps.setLong(1, id);
 
             try (ResultSet resultSet = ps.executeQuery()) {
                 return extractSessionRecordIfPresent(resultSet);
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List <SessionRecord> findByStudentId(Long id) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_SESSION_RECORD_BY_STUDENT_ID);
+
+        ) {
+            statement.setLong(1, id);
+
+            try (ResultSet resultSet = statement.executeQuery()){
+                List<SessionRecord> sessionRecords = new ArrayList<>();
+                while (resultSet.next()) {
+                    SessionRecord fetchedSessionRecord = extractSessionRecord(resultSet);
+
+                    sessionRecords.add(fetchedSessionRecord);
+                }
+                return sessionRecords;
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<SessionRecord> findBySessionId(Long id) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_SESSION_RECORD_BY_SESSION_ID);
+
+        ) {
+            statement.setLong(1, id);
+
+            try (ResultSet resultSet = statement.executeQuery()){
+                List<SessionRecord> sessionRecords = new ArrayList<>();
+                while (resultSet.next()) {
+                    SessionRecord fetchedSessionRecord = extractSessionRecord(resultSet);
+
+                    sessionRecords.add(fetchedSessionRecord);
+                }
+                return sessionRecords;
             }
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -94,9 +137,13 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
                 Connection connection = dbConnection.getConnection();
                 PreparedStatement ps = connection.prepareStatement(CREATE_SESSION_RECORD_SQL)
         ) {
-            ps.setDouble(1, dto.getScore());
-            ps.setString(2, dto.getHost_notes());
-            ps.setBoolean(3, dto.getWas_present());
+            ps.setDouble(1, dto.getSessionId());
+            ps.setDouble(2, dto.getPairId());
+            ps.setDouble(3, dto.getStudentId());
+            ps.setDouble(4, dto.getHostId());
+            ps.setDouble(5, dto.getScore());
+            ps.setString(6, dto.getHostNotes());
+            ps.setBoolean(7, dto.getWasPresent());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -107,16 +154,17 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
     public void updateSessionRecord(UpdateSessionRecordDto dto) {
         try (
                 Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+                PreparedStatement ps = connection.prepareStatement(UPDATE_SQL)
         ) {
-            statement.setLong(1, dto.getPair_id());
-            statement.setLong(2, dto.getStudent_id());
-            statement.setLong(3, dto.getHost_id());
-            statement.setDouble(4, dto.getScore());
-            statement.setString(5, dto.getHost_notes());
-            statement.setBoolean(6, dto.getWas_present());
-            statement.setLong(7, dto.getSession_id());
-            statement.executeUpdate();
+            ps.setDouble(1, dto.getSessionId());
+            ps.setDouble(2, dto.getPairId());
+            ps.setDouble(3, dto.getStudentId());
+            ps.setDouble(4, dto.getHostId());
+            ps.setDouble(5, dto.getScore());
+            ps.setString(6, dto.getHostNotes());
+            ps.setBoolean(7, dto.getWasPresent());
+            ps.setLong(8,dto.getId());
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }
@@ -124,15 +172,12 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
     }
 
     @Override
-    public void deleteById(Long sessionId, Long pairId, Long studentId, Long hostId) {
+    public void deleteById(Long id) {
         try(
                 Connection connection = dbConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(DELETE_SQL)
         ) {
-            statement.setLong(1, sessionId);
-            statement.setLong(2, pairId);
-            statement.setLong(3, studentId);
-            statement.setLong(4, hostId);
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -149,13 +194,13 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
 
     private SessionRecord extractSessionRecord(ResultSet resultSet) throws SQLException {
         return SessionRecord.builder()
-                .session_id((resultSet.getLong(SessionRecordTable.SESSION_ID.getName())))
-                .pair_id(resultSet.getLong(SessionRecordTable.PAIR_ID.getName()))
-                .student_id(resultSet.getLong(SessionRecordTable.STUDENT_ID.getName()))
-                .host_id(resultSet.getLong(SessionRecordTable.HOST_ID.getName()))
+                .sessionId((resultSet.getLong(SessionRecordTable.SESSION_ID.getName())))
+                .pairId(resultSet.getLong(SessionRecordTable.PAIR_ID.getName()))
+                .studentId(resultSet.getLong(SessionRecordTable.STUDENT_ID.getName()))
+                .hostId(resultSet.getLong(SessionRecordTable.HOST_ID.getName()))
                 .score(resultSet.getDouble(SessionRecordTable.SCORE.getName()))
-                .host_notes(resultSet.getString(SessionRecordTable.HOST_NOTES.getName()))
-                .was_present(resultSet.getBoolean(SessionRecordTable.WAS_PRESENT.getName()))
+                .hostNotes(resultSet.getString(SessionRecordTable.HOST_NOTES.getName()))
+                .wasPresent(resultSet.getBoolean(SessionRecordTable.WAS_PRESENT.getName()))
                 .build();
     }
 }

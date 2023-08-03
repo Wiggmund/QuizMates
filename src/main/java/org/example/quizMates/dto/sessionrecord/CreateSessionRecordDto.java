@@ -10,8 +10,11 @@ import lombok.ToString;
 @Setter
 @ToString
 public class CreateSessionRecordDto {
-    private Long session_id
+    private Long sessionId;
+    private Long pairId;
+    private Long studentId;
+    private Long hostId;
     private Double score;
-    private String host_notes;
-    private Boolean was_present;
+    private String hostNotes;
+    private Boolean wasPresent;
 }

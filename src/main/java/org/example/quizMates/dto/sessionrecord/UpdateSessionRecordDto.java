@@ -12,11 +12,12 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 public class UpdateSessionRecordDto {
-    private Long session_id;
-    private Long pair_id;
-    private Long student_id;
-    private Long host_id;
+    private Long id;
+    private Long sessionId;
+    private Long pairId;
+    private Long studentId;
+    private Long hostId;
     private Double score;
-    private String host_notes;
-    private Boolean was_present;
+    private String hostNotes;
+    private Boolean wasPresent;
 }

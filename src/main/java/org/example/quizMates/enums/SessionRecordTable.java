@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum SessionRecordTable {
     TABLE_NAME("sessionsrecords"),
+    ID("id"),
     SESSION_ID("session_id"),
     PAIR_ID("pair_id"),
     STUDENT_ID("student_id"),
