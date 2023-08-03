@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 -- Create the 'sessionsrecords' table
 CREATE TABLE IF NOT EXISTS sessionsrecords (
+
      session_id     BIGINT REFERENCES sessions(id) ON DELETE SET NULL,
      pair_id        BIGINT REFERENCES pairs(id) ON DELETE SET NULL,
      student_id     BIGINT REFERENCES students(id) ON DELETE SET NULL,
