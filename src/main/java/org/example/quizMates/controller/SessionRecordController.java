@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.quizMates.config.ApplicationConfig;
 import org.example.quizMates.dto.sessionrecord.CreateSessionRecordDto;
 import org.example.quizMates.dto.sessionrecord.UpdateSessionRecordDto;
 import org.example.quizMates.exception.ExceptionResponse;
@@ -26,7 +27,7 @@ public class SessionRecordController extends HttpServlet {
     private final static String ID_REQ_PARAM = "id";
     private final static String STUDENT_ID_REQ_PARAM = "studentId";
     private final static String SESSION_ID_REQ_PARAM = "sessionId";
-    private final static Gson gson = new Gson();
+    private final static Gson gson = ApplicationConfig.GSON;
 
     public SessionRecordController() {
         this(SessionRecordServiceImpl.getInstance());
