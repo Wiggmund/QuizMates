@@ -9,7 +9,6 @@ import org.example.quizMates.service.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class StudentsPairsServiceImpl implements StudentsPairsService {
     private final SessionService sessionService;
@@ -135,14 +134,16 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
 
             return false;
         }).toList();
-
+        System.out.println("NON"  + notExistedPairs);
         if(!notExistedPairs.isEmpty()) {
+            System.out.println("INNNER");
             for (CreatePairDto dto : notExistedPairs) {
                 pairService.createPair(dto);
             }
         }
         /*-------------------*/
+        System.out.println("RES" + resultDtos);
 
-        return new ArrayList<>();
+        return pairService.findPairsByStudents(resultDtos);
     }
 }

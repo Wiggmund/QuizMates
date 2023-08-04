@@ -34,8 +34,8 @@ public class SessionRepositoryImpl implements SessionRepository {
             TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, BEST_STUDENT_COL, BEST_GROUP_COL, STATUS_COL, ID_COL);
     private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE id = ?", TABLE_NAME);
     private static final String SELECT_SESSION_BY_TITLE = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, TITLE_COL);
-    private static final String SELECT_LAST_SESSION = String.format("SELECT %s FROM %s WHERE %s = (SELECT MAX(%s) FROM %s)",
-            ID_COL, TABLE_NAME, ID_COL, ID_COL, TABLE_NAME);
+    private static final String SELECT_LAST_SESSION = String.format("SELECT * FROM %s WHERE %s = (SELECT MAX(%s) FROM %s)",
+            TABLE_NAME, ID_COL, ID_COL, TABLE_NAME);
 
     private final DBConnection dbConnection;
 

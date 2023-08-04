@@ -1,0 +1,180 @@
+{
+  "sessions": [
+    {
+      "id": 1,
+      "title": "test",
+      "description": "test",
+      "date": "2023-08-04T02:37:31",
+      "best_student": 1,
+      "best_group": 1,
+      "status": false
+    }
+  ],
+  "sessionsRecords": [
+    {
+      "id": 1,
+      "sessionId": 1,
+      "pairId": 7,
+      "studentId": 1,
+      "hostId": 1,
+      "score": 1.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    },
+    {
+      "id": 2,
+      "sessionId": 1,
+      "pairId": 7,
+      "studentId": 5,
+      "hostId": 1,
+      "score": 3.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    },
+    {
+      "id": 3,
+      "sessionId": 1,
+      "pairId": 8,
+      "studentId": 6,
+      "hostId": 1,
+      "score": 2.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    },
+    {
+      "id": 4,
+      "sessionId": 1,
+      "pairId": 8,
+      "studentId": 8,
+      "hostId": 1,
+      "score": 2.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    },
+    {
+      "id": 5,
+      "sessionId": 1,
+      "pairId": 9,
+      "studentId": 3,
+      "hostId": 1,
+      "score": 2.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    },
+    {
+      "id": 6,
+      "sessionId": 1,
+      "pairId": 9,
+      "studentId": 7,
+      "hostId": 1,
+      "score": 2.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    },
+    {
+      "id": 7,
+      "sessionId": 1,
+      "pairId": 10,
+      "studentId": 4,
+      "hostId": 1,
+      "score": 2.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    },
+    {
+      "id": 8,
+      "sessionId": 1,
+      "pairId": 10,
+      "studentId": 9,
+      "hostId": 1,
+      "score": 3.0,
+      "hostNotes": "test",
+      "wasPresent": true
+    }
+  ],
+  "students": [
+    {
+      "id": 8,
+      "firstName": "Nak",
+      "lastName": "Nok",
+      "groupId": 3
+    },
+    {
+      "id": 10,
+      "firstName": "qer",
+      "lastName": "qor",
+      "groupId": 3
+    },
+    {
+      "id": 6,
+      "firstName": "Sok",
+      "lastName": "Suk",
+      "groupId": 2
+    },
+    {
+      "id": 3,
+      "firstName": "Din",
+      "lastName": "Zik",
+      "groupId": 1
+    },
+    {
+      "id": 1,
+      "firstName": "Sem",
+      "lastName": "Zik",
+      "groupId": 1
+    },
+    {
+      "id": 9,
+      "firstName": "Rek",
+      "lastName": "Rok",
+      "groupId": 3
+    },
+    {
+      "id": 4,
+      "firstName": "Kit",
+      "lastName": "Kat",
+      "groupId": 1
+    },
+    {
+      "id": 7,
+      "firstName": "Tik",
+      "lastName": "Tok",
+      "groupId": 2
+    },
+    {
+      "id": 11,
+      "firstName": "sak",
+      "lastName": "sok",
+      "groupId": 3
+    },
+    {
+      "id": 5,
+      "firstName": "Mik",
+      "lastName": "Nak",
+      "groupId": 2
+    }
+  ],
+  "pairs": [
+    {
+      "id": 7,
+      "studentA": 1,
+      "studentB": 5
+    },
+    {
+      "id": 8,
+      "studentA": 6,
+      "studentB": 8
+    },
+    {
+      "id": 9,
+      "studentA": 3,
+      "studentB": 7
+    },
+    {
+      "id": 10,
+      "studentA": 4,
+      "studentB": 9
+    }
+  ],
+
+}

@@ -33,7 +33,7 @@ public class PairRepositoryImpl implements PairRepository {
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
     private final static String BY_STUDENT_A_AND_STUDENT_B_SQL = String.format(
-            "SELECT * FROM %s WHERE %s IN (?, ?) AND %s IN (?, ?)",
+            "SELECT * FROM %s WHERE %s IN(?, ?) AND %s IN(?, ?)",
             TABLE_NAME, STUDENT_A_COL, STUDENT_B_COL);
 
     private PairRepositoryImpl() {
