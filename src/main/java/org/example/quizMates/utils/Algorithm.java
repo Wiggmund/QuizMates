@@ -1,5 +1,7 @@
 package org.example.quizMates.utils;
 
+import org.example.quizMates.dto.pair.CreatePairDto;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,71 +9,71 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Algorithm {
-    static List<Integer> studentGpoupA;
-    static List<Integer> studentGpoupB;
-    static List<Pair> previousStudentPairs;
-    static List<Pair> currentStudentPairs = new ArrayList<>();
+    static List<Long> studentGpoupA;
+    static List<Long> studentGpoupB;
+    static List<CreatePairDto> previousStudentPairs;
+    static List<CreatePairDto> currentStudentPairs = new ArrayList<>();
 
-    public static List<Pair> chooseRandomPair(List<Integer> groupA, List<Integer> groupB) {
+    public static List<CreatePairDto> chooseRandomPair(List<Long> groupA, List<Long> groupB) {
         if (groupA.isEmpty() || groupB.isEmpty()) {
             return null;
         }
         Collections.shuffle(groupA);
         Collections.shuffle(groupB);
-        List<Integer> currStudB = new ArrayList<>();
+        List<Long> currStudB = new ArrayList<>();
 
         for (int i = 0; i < Math.min(groupA.size(), groupB.size()); i++) {
-            Integer stA = groupA.get(i);
-            Integer stB = groupB.stream()
+            Long stA = groupA.get(i);
+            Long stB = groupB.stream()
                     .filter(stb -> !stb.equals(getStudentsPreviousPair(stA, previousStudentPairs)))
                     .filter(stb -> !currStudB.contains(stb)) // убираем если участвовал в выбоорке
-                    .findAny().orElse(-1);
+                    .findAny().orElse(-1L);
             currStudB.add(stB);
-            currentStudentPairs.add(new Pair(stA, stB));
+            currentStudentPairs.add(new CreatePairDto(stA, stB));
         }
         return currentStudentPairs;
         // нужно будет дописать логику перехода currentStudentPairs -> previousStudentPairs после окончания работы
     }
 
-    public static Integer getStudentsPreviousPair(Integer student, List<Pair> previousStudentPairs) {
+    public static Long getStudentsPreviousPair(Long student, List<CreatePairDto> previousStudentPairs) {
         return previousStudentPairs.stream()
                 .filter(candidate ->
-                        candidate.getStudentOne().equals(student) || candidate.getStudentTwo().equals(student))
-                .map(candidate -> candidate.getStudentOne().equals(student) ? candidate.getStudentTwo() : candidate.getStudentOne())
+                        candidate.getStudentA().equals(student) || candidate.getStudentB().equals(student))
+                .map(candidate -> candidate.getStudentA().equals(student) ? candidate.getStudentB() : candidate.getStudentA())
                 .findFirst()
-                .orElse(-1);
+                .orElse(-1L);
     }
 
-    public static List<Integer> getStudentListWithoutAbsent(List<Integer> studentGroup, List<Integer> absentStudentList){
+    public static List<Long> getStudentListWithoutAbsent(List<Long> studentGroup, List<Long> absentStudentList){
         return studentGroup.stream()
                 .filter(student -> !absentStudentList.contains(student))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public static List<Integer> getUnpairedStudents(List<Integer> studentGpoupA, List<Integer> studentGpoupB,
-                                                    List<Pair> currentStudentPairs, List<Integer> absentStudentList){
-        List<Integer> allStudents = Stream.concat(studentGpoupA.stream(), studentGpoupB.stream()).toList();
-        List<Integer> allStudentsWithoutAbsent = getStudentListWithoutAbsent(allStudents, absentStudentList);
-        List<Integer> studentsFromPairA = currentStudentPairs.stream()
-                .map(Pair::getStudentOne)
+    public static List<Long> getUnpairedStudents(List<Long> studentGpoupA, List<Long> studentGpoupB,
+                                                    List<CreatePairDto> currentStudentPairs, List<Long> absentStudentList){
+        List<Long> allStudents = Stream.concat(studentGpoupA.stream(), studentGpoupB.stream()).toList();
+        List<Long> allStudentsWithoutAbsent = getStudentListWithoutAbsent(allStudents, absentStudentList);
+        List<Long> studentsFromPairA = currentStudentPairs.stream()
+                .map(CreatePairDto::getStudentA)
                 .collect(Collectors.toCollection(ArrayList::new));
-        List<Integer> studentsFromPairB = currentStudentPairs.stream()
-                .map(Pair::getStudentTwo)
+        List<Long> studentsFromPairB = currentStudentPairs.stream()
+                .map(CreatePairDto::getStudentB)
                 .collect(Collectors.toCollection(ArrayList::new));
-        List<Integer> allPairedStudents = Stream.concat(studentsFromPairA.stream(), studentsFromPairB.stream()).toList();
+        List<Long> allPairedStudents = Stream.concat(studentsFromPairA.stream(), studentsFromPairB.stream()).toList();
         return allStudentsWithoutAbsent.stream()
                 .filter(student -> !allPairedStudents.contains(student))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public static void main(String[] args) {
-        studentGpoupA = new ArrayList<>(List.of(1,3,5));
-        studentGpoupB = new ArrayList<>(List.of(2,4,6));
-        List<Integer> absentStudents = new ArrayList<>(List.of(3));
+        studentGpoupA = new ArrayList<>(List.of(1L,3L,5L));
+        studentGpoupB = new ArrayList<>(List.of(2L,4L,6L));
+        List<Long> absentStudents = new ArrayList<>(List.of(3L));
         previousStudentPairs = List.of(
-                new Pair(1, 2),
-                new Pair(3, 4),
-                new Pair(5,6));
+                new CreatePairDto(1L, 2L),
+                new CreatePairDto(3L, 4L),
+                new CreatePairDto(5L,6L));
         //System.out.println(algorithm.getStudentsPreviousPair(6, previousStudentPairs));
         System.out.println(Algorithm.chooseRandomPair(Algorithm.getStudentListWithoutAbsent(studentGpoupA, absentStudents),
                 Algorithm.getStudentListWithoutAbsent(studentGpoupB, absentStudents)));
@@ -79,37 +81,13 @@ public class Algorithm {
         System.out.println(Algorithm.getUnpairedStudents(studentGpoupA,studentGpoupB, currentStudentPairs, absentStudents));
     }
 }
-class Pair {
-    private final Integer studentOne;
-    private final Integer studentTwo;
 
-    @Override
-    public String toString() {
-        return "Pair{" +
-                "studentOne=" + studentOne +
-                ", studentTwo=" + studentTwo +
-                '}';
-    }
-
-    public Pair(Integer s1, Integer s2) {
-        this.studentOne = s1;
-        this.studentTwo = s2;
-    }
-
-    public Integer getStudentTwo() {
-        return studentTwo;
-    }
-
-    public Integer getStudentOne() {
-        return studentOne;
-    }
-}
 record ClientRequest(
         List<Long> groups,
         List<Long> absentStudents
 ){}
 
 record Response(
-        List<Pair> pairs,
+        List<CreatePairDto> pairs,
         List<Long> unpairedStudents
 ){}

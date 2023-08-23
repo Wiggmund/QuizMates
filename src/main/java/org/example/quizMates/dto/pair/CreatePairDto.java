@@ -12,4 +12,9 @@ import lombok.ToString;
 public class CreatePairDto {
     private Long studentA;
     private Long studentB;
+
+    public CreatePairDto(Long studentA, Long studentB) {
+        this.studentA = studentA;
+        this.studentB = studentB;
+    }
 }
