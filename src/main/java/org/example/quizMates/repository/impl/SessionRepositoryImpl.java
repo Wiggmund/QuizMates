@@ -34,6 +34,8 @@ public class SessionRepositoryImpl implements SessionRepository {
             TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, BEST_STUDENT_COL, BEST_GROUP_COL, STATUS_COL, ID_COL);
     private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE id = ?", TABLE_NAME);
     private static final String SELECT_SESSION_BY_TITLE = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, TITLE_COL);
+    private static final String SELECT_LAST_SESSION = String.format("SELECT * FROM %s WHERE %s = (SELECT MAX(%s) FROM %s)",
+            TABLE_NAME, ID_COL, ID_COL, TABLE_NAME);
 
     private final DBConnection dbConnection;
 
@@ -52,8 +54,8 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public Optional<Session> findById(Long id) {
         try (
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement ps = connection.prepareStatement(SELECT_SESSION_BY_ID)
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(SELECT_SESSION_BY_ID)
         ) {
             ps.setLong(1, id);
 
@@ -68,9 +70,9 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public List<Session> findAll() {
         try (
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
-            ResultSet resultSet = statement.executeQuery()
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
+                ResultSet resultSet = statement.executeQuery()
         ) {
             List<Session> sessions = new ArrayList<>();
 
@@ -102,10 +104,23 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
+    public Optional<Session> getLastSession() {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(SELECT_LAST_SESSION);
+                ResultSet resultSet = ps.executeQuery()
+        ) {
+            return extractSessionIfPresent(resultSet);
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
     public void createSession(CreateSessionDto dto) {
         try (
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement ps = connection.prepareStatement(CREATE_SESSIONS_SQL)
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(CREATE_SESSIONS_SQL)
         ) {
             ps.setString(1, dto.getTitle());
             ps.setString(2, dto.getDescription());
@@ -122,8 +137,8 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public void updateSession(UpdateSessionDto dto) {
         try (
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
         ) {
             statement.setString(1, dto.getTitle());
             statement.setString(2, dto.getDescription());

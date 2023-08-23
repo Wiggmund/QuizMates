@@ -10,6 +10,7 @@ import org.example.quizMates.service.DuplicationService;
 import org.example.quizMates.service.SessionService;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
@@ -73,4 +74,9 @@ public class SessionServiceImpl implements SessionService {
             sessionRepository.updateSession(dto);
         }
     }
+    @Override
+    public Optional<Session> getLastSession() {
+        return sessionRepository.getLastSession();
+    }
+
 }

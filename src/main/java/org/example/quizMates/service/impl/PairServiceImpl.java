@@ -48,6 +48,16 @@ public class PairServiceImpl implements PairService {
     }
 
     @Override
+    public List<Pair> findPairsByIds(List<Long> ids) {
+        return pairRepository.findPairsByIds(ids);
+    }
+
+    @Override
+    public List<Pair> findPairsByStudents(List<CreatePairDto> dtos) {
+        return pairRepository.findPairsByStudents(dtos);
+    }
+
+    @Override
     public void createPair(CreatePairDto dto) {
         boolean theSamePairExist = duplicationService.doTheSamePairExist(dto.getStudentA(), dto.getStudentB());
         if (theSamePairExist) {
