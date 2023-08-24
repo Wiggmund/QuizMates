@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.quizMates.config.ApplicationConfig;
+import org.example.quizMates.dto.http.GeneratePairsRequestDto;
+import org.example.quizMates.dto.http.GeneratePairsResponseDto;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
 import org.example.quizMates.model.Pair;
@@ -29,10 +31,11 @@ public class StudentsPairsController extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            List<Pair> pairs = studentPairService.generatePairs();
-            ControllerHelper.writeResponse(resp, pairs, HttpServletResponse.SC_OK);
+            GeneratePairsRequestDto dto = gson.fromJson(req.getReader(), GeneratePairsRequestDto.class);
+            GeneratePairsResponseDto pairsResponseDto = studentPairService.generatePairs(dto);
+            ControllerHelper.writeResponse(resp, pairsResponseDto, HttpServletResponse.SC_OK);
 
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);

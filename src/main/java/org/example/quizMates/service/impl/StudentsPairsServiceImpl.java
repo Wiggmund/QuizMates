@@ -1,5 +1,7 @@
 package org.example.quizMates.service.impl;
 
+import org.example.quizMates.dto.http.GeneratePairsRequestDto;
+import org.example.quizMates.dto.http.GeneratePairsResponseDto;
 import org.example.quizMates.dto.pair.CreatePairDto;
 import org.example.quizMates.model.Pair;
 import org.example.quizMates.model.Session;
@@ -31,7 +33,7 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
     }
 
     @Override
-    public List<Pair> generatePairs() {
+    public GeneratePairsResponseDto generatePairs(GeneratePairsRequestDto payload) {
         final Long EMPTY = -1L;
         Session session = sessionService.getLastSession().get();
         List<SessionRecord> fetchedRecordsForLastSession = sessionRecordService.findBySessionId(session.getId());
@@ -144,6 +146,7 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
         /*-------------------*/
         System.out.println("RES" + resultDtos);
 
-        return pairService.findPairsByStudents(resultDtos);
+//        return pairService.findPairsByStudents(resultDtos);
+        return null;
     }
 }
