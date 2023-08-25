@@ -53,11 +53,11 @@ public class GeneratePairsHelper {
         Map<Long, List<Student>> presentStudentsByGroup = presentStudents.stream()
                 .collect(Collectors.groupingBy(Student::getGroupId));
 
-        return presentStudents.stream()
+        return presentStudentsByGroup.keySet().stream()
                 .collect(Collectors.toMap(
-                        Student::getGroupId,
-                        student -> presentStudentsByGroup.keySet().stream()
-                                .filter(groupId -> !Objects.equals(groupId, student.getGroupId()))
+                        Function.identity(),
+                        currentGroupId -> presentStudentsByGroup.keySet().stream()
+                                .filter(groupId -> !currentGroupId.equals(groupId))
                                 .flatMap(groupId -> presentStudentsByGroup.get(groupId).stream())
                                 .collect(Collectors.toMap(Student::getId, Function.identity()))
                 ));

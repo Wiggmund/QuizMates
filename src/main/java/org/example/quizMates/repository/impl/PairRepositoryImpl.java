@@ -134,8 +134,9 @@ public class PairRepositoryImpl implements PairRepository {
                 PreparedStatement statement = connection.prepareStatement(SELECT_PAIRS_BY_STUDENTS_SQL)
         ) {
             List<Pair> allPairs = new ArrayList<>();
-            setLongPlaceholders(statement, studentsAIds);
-            setLongPlaceholders(statement, studentsBIds);
+            ArrayList<Long> statementParams = new ArrayList<>(studentsAIds);
+            statementParams.addAll(studentsBIds);
+            setLongPlaceholders(statement, statementParams);
 
             try(ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
