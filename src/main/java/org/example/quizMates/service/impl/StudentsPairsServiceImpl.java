@@ -77,17 +77,24 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
 
             if (possibleOpponents.size() == 1) {
                 studentBId = possibleOpponents.keySet().iterator().next();
-                possibleOpponents.remove(studentBId);
-                helper.addToTakenStudentsAndToGeneratedPairDtos.accept(studentAId, studentBId);
-                continue;
+
+                if (!helper.isStudentTaken.test(studentBId)) {
+                    possibleOpponents.remove(studentBId);
+                    helper.addToTakenStudentsAndToGeneratedPairDtos.accept(studentAId, studentBId);
+                    continue;
+                }
             }
 
             helper.addToTakenStudents.accept(studentAId);
             helper.unpairedStudents.add(studentAId);
         }
 
+        List<Pair> generatedAndFetchedPairs = helper.generatedPairsDtos.isEmpty()
+                ? new ArrayList<>()
+                : generateUtil.getPairOrCreateIfNotExist(helper.generatedPairsDtos);
+
         return GeneratePairsResponseDto.builder()
-                .pairs(generateUtil.getPairOrCreateIfNotExist(helper.generatedPairsDtos))
+                .pairs(generatedAndFetchedPairs)
                 .unpairedStudentsIds(helper.unpairedStudents)
                 .build();
     }

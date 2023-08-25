@@ -223,8 +223,9 @@ public class PairRepositoryImpl implements PairRepository {
         Long firstStudentAId = studentsAIds.get(index);
         Long firstStudentBId = studentsBIds.get(index);
 
-        String firstPart = String.format("(%s = %s AND %s = %s)",
-                STUDENT_A_COL, firstStudentAId, STUDENT_B_COL, firstStudentBId);
+        String firstPart = String.format("((%s = %s AND %s = %s) OR (%s = %s AND %s = %s))",
+                STUDENT_A_COL, firstStudentAId, STUDENT_B_COL, firstStudentBId,
+                STUDENT_B_COL, firstStudentAId, STUDENT_A_COL, firstStudentBId);
 
         List<String> orParts = new ArrayList<>();
         if (studentsAIds.size() > 1) {
@@ -232,8 +233,9 @@ public class PairRepositoryImpl implements PairRepository {
                 firstStudentAId = studentsAIds.get(i);
                 firstStudentBId = studentsBIds.get(i);
 
-                String orPart = String.format("OR (%s = %s AND %s = %s)",
-                        STUDENT_A_COL, firstStudentAId, STUDENT_B_COL, firstStudentBId);
+                String orPart = String.format("OR ((%s = %s AND %s = %s) OR (%s = %s AND %s = %s))",
+                        STUDENT_A_COL, firstStudentAId, STUDENT_B_COL, firstStudentBId,
+                        STUDENT_B_COL, firstStudentAId, STUDENT_A_COL, firstStudentBId);
                 orParts.add(orPart);
             }
         }
