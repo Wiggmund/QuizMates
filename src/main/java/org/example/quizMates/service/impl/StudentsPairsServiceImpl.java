@@ -3,13 +3,14 @@ package org.example.quizMates.service.impl;
 import org.example.quizMates.dto.http.GeneratePairsRequestDto;
 import org.example.quizMates.dto.http.GeneratePairsResponseDto;
 import org.example.quizMates.dto.pair.CreatePairDto;
-import org.example.quizMates.model.Pair;
-import org.example.quizMates.model.Session;
-import org.example.quizMates.model.SessionRecord;
-import org.example.quizMates.model.Student;
+import org.example.quizMates.model.*;
 import org.example.quizMates.service.*;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class StudentsPairsServiceImpl implements StudentsPairsService {
@@ -17,11 +18,16 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
     private final SessionRecordService sessionRecordService;
     private final PairService pairService;
     private final StudentService studentService;
+    private final GroupService groupService;
+    private final GroupStudentService groupStudentService;
+
     private StudentsPairsServiceImpl() {
         this.sessionService = SessionServiceImpl.getInstance();
         this.sessionRecordService = SessionRecordServiceImpl.getInstance();
         this.pairService = PairServiceImpl.getInstance();
         this.studentService = StudentServiceImpl.getInstance();
+        this.groupService = GroupServiceImpl.gteInstance();
+        this.groupStudentService = GroupStudentServiceImpl.getInstance();
     }
 
     private static class StudentPairServiceImplSingleton {
@@ -34,119 +40,169 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
 
     @Override
     public GeneratePairsResponseDto generatePairs(GeneratePairsRequestDto payload) {
-        final Long EMPTY = -1L;
-        Session session = sessionService.getLastSession().get();
-        List<SessionRecord> fetchedRecordsForLastSession = sessionRecordService.findBySessionId(session.getId());
-        List<Long> lastSessionPairIds = fetchedRecordsForLastSession.stream().map(SessionRecord::getPairId).toList();
-        List<Pair> lastSessionPairsList = pairService.findPairsByIds(lastSessionPairIds);
+        List<Long> groupsIds = payload.getGroupsIds();
+        List<Long> absentStudents = payload.getAbsentStudents();
+
+        List<Student> studentsFromGroups = getStudentsFromGroups(groupsIds);
+        List<Student> presentStudents = getPresentStudents(studentsFromGroups, absentStudents);
+        List<Pair> previousPairs = getPreviousPairs();
+
+        return previousPairs.isEmpty()
+                ? generatePairs(presentStudents)
+                : generatePairsBasedOnPrevious(presentStudents, previousPairs);
+    }
+
+    private GeneratePairsResponseDto generatePairsBasedOnPrevious(List<Student> presentStudents, List<Pair> previousPairs) {
+        Map<Long, Map<Long, Student>> possibleOpponentsForGroups = getGroupsWithPossibleOpponents(presentStudents);
+        Helper helper = new Helper();
+
+        for(Student studentA : presentStudents) {
+            Long studentAId = studentA.getId();
+            if (helper.isStudentTaken.test(studentAId)) continue;
+
+            Long studentBId = null;
+            Map<Long, Student> possibleOpponents = possibleOpponentsForGroups.get(studentA.getGroupId());
 
 
-        /*-------------------*/
-        List<Student> allStudents = studentService.findAll();
-        Map<Long, List<Student>> allStudentsByGroup = allStudents.stream()
-                .collect(Collectors.groupingBy(Student::getGroupId));
-        /*-------------------*/
+            for (Long opponentId : possibleOpponents.keySet()) {
+                boolean theSameAsPreviousPair = previousPairs.stream().anyMatch(pair ->
+                        pair.isPairConsistOfGivenStudents(studentAId, opponentId));
 
-
-        /*-------------------*/
-        Map<Long, Long> allStudentsWithPairLastSession = new HashMap<>();
-        Map<Long, Long> aStudents = lastSessionPairsList.stream().collect(Collectors.toMap(Pair::getStudentA, Pair::getStudentB));
-        Map<Long, Long> bStudents = lastSessionPairsList.stream().collect(Collectors.toMap(Pair::getStudentB, Pair::getStudentA));
-
-        aStudents.forEach((key, value) -> allStudentsWithPairLastSession.merge(key, value, (a, b) -> {
-            throw new IllegalArgumentException("Duplicated key");}));
-        bStudents.forEach((key, value) -> allStudentsWithPairLastSession.merge(key, value, (a, b) -> {
-            throw new IllegalArgumentException("Duplicated key");}));
-        /*-------------------*/
-
-
-        Map<Long, List<Long>> allStudentsWithPossiblePair = new HashMap<>();
-        for (Student currentStudent : allStudents) {
-            List<Long> possiblePairIds = allStudentsByGroup.keySet().stream()
-                    .filter(groupId -> !Objects.equals(groupId, currentStudent.getGroupId()))
-                    .toList();
-
-            allStudentsWithPossiblePair.put(currentStudent.getId(), possiblePairIds);
-        }
-
-
-        /*-------------------*/
-        List<CreatePairDto> resultDtos = new ArrayList<>();
-        Map<Long, Long> takenStudents = new HashMap<>();
-
-        allStudentsWithPossiblePair.forEach((currentStudent, possiblePairsIds) -> {
-            boolean doCurrentStudentTaken = Objects.equals(takenStudents.getOrDefault(currentStudent, EMPTY), EMPTY);
-            if (doCurrentStudentTaken) return;
-
-            Long studentA = currentStudent;
-            Long studentB;
-
-            Long lastSessionPair = allStudentsWithPairLastSession.get(currentStudent);
-            for (int i = 0; i < possiblePairsIds.size(); i++) {
-                Long possiblePair = possiblePairsIds.get(i);
-                boolean doPossiblePairTheSameAsLastSession = Objects.equals(possiblePair, lastSessionPair);
-                boolean doPossiblePairTaken = Objects.equals(takenStudents.getOrDefault(possiblePair, EMPTY), EMPTY);
-
-                if (!doPossiblePairTheSameAsLastSession && !doPossiblePairTaken) {
-                    studentB = possiblePair;
-
-                    resultDtos.add(CreatePairDto.builder()
-                            .studentA(studentA)
-                            .studentB(studentB)
-                            .build());
-
-                    takenStudents.put(studentA, studentA);
-                    takenStudents.put(studentB, studentB);
+                if (!theSameAsPreviousPair) {
+                    studentBId = opponentId;
                     break;
                 }
             }
-        });
-        /*-------------------*/
 
-
-
-        /*-------------------*/
-        List<Pair> allExistedPairs = pairService.findAll();
-        Map<Long, Long> asKeyStudentA = allExistedPairs.stream()
-                .collect(Collectors.toMap(Pair::getStudentA, Pair::getStudentB));
-        Map<Long, Long> asKeyStudentB = allExistedPairs.stream()
-                .collect(Collectors.toMap(Pair::getStudentB, Pair::getStudentA));
-
-        List<CreatePairDto> notExistedPairs = resultDtos.stream().filter((dto) -> {
-            /*
-             * A) Pair(studentA = 1, studentB = 2)
-             * B) Pair(studentA = 2, studentB = 1)
-             *
-             * Option A is obviously the same as option B. So we have to check both to filter
-             * */
-
-            /*
-             * Option A
-             * */
-            boolean doStudentAPresentAsStudentA = Objects.equals(asKeyStudentA.getOrDefault(dto.getStudentA(), EMPTY), EMPTY);
-            boolean doStudentBPresentAsStudentB = Objects.equals(asKeyStudentB.getOrDefault(dto.getStudentB(), EMPTY), EMPTY);
-            if (doStudentAPresentAsStudentA && doStudentBPresentAsStudentB) return true;
-
-            /*
-             * Option B
-             * */
-            boolean doStudentBPresentAsStudentA = Objects.equals(asKeyStudentA.getOrDefault(dto.getStudentB(), EMPTY), EMPTY);
-            boolean doStudentAPresentAsStudentB = Objects.equals(asKeyStudentB.getOrDefault(dto.getStudentA(), EMPTY), EMPTY);
-            if (doStudentBPresentAsStudentA && doStudentAPresentAsStudentB) return true;
-
-            return false;
-        }).toList();
-        System.out.println("NON"  + notExistedPairs);
-        if(!notExistedPairs.isEmpty()) {
-            System.out.println("INNNER");
-            for (CreatePairDto dto : notExistedPairs) {
-                pairService.createPair(dto);
+            if (studentBId != null) {
+                possibleOpponents.remove(studentBId);
+                helper.addToTakenStudentsAndToGeneratedPairDtos.accept(studentAId, studentBId);
+                continue;
             }
-        }
-        /*-------------------*/
-        System.out.println("RES" + resultDtos);
 
-//        return pairService.findPairsByStudents(resultDtos);
-        return null;
+            if (possibleOpponents.size() == 1) {
+                studentBId = possibleOpponents.keySet().iterator().next();
+                possibleOpponents.remove(studentBId);
+                helper.addToTakenStudentsAndToGeneratedPairDtos.accept(studentAId, studentBId);
+                continue;
+            }
+
+            helper.addToTakenStudents.accept(studentAId);
+            helper.unpairedStudents.add(studentAId);
+        }
+
+        return GeneratePairsResponseDto.builder()
+                .pairs(getPairOrCreateIfNotExist(helper.generatedPairsDtos))
+                .unpairedStudentsIds(helper.unpairedStudents)
+                .build();
+    }
+
+    private GeneratePairsResponseDto generatePairs(List<Student> presentStudents) {
+        Map<Long, Map<Long, Student>> possibleOpponentsForGroups = getGroupsWithPossibleOpponents(presentStudents);
+        Helper helper = new Helper();
+
+        for(Student studentA : presentStudents) {
+            Long studentAId = studentA.getId();
+            if (helper.isStudentTaken.test(studentAId)) continue;
+
+            Long studentBId = null;
+            Map<Long, Student> possibleOpponents = possibleOpponentsForGroups.get(studentA.getGroupId());
+            Iterator<Long> iterator = possibleOpponents.keySet().iterator();
+
+            if (!iterator.hasNext()) {
+                helper.unpairedStudents.add(studentAId);
+                helper.addToTakenStudents.accept(studentAId);
+                continue;
+            }
+
+            studentBId = iterator.next();
+            iterator.remove();
+            helper.addToTakenStudentsAndToGeneratedPairDtos.accept(studentAId, studentBId);
+        }
+
+        return GeneratePairsResponseDto.builder()
+                .pairs(getPairOrCreateIfNotExist(helper.generatedPairsDtos))
+                .unpairedStudentsIds(helper.unpairedStudents)
+                .build();
+    }
+
+    private Map<Long, Map<Long, Student>> getGroupsWithPossibleOpponents(List<Student> presentStudents) {
+        Map<Long, List<Student>> presentStudentsByGroup = presentStudents.stream()
+                .collect(Collectors.groupingBy(Student::getGroupId));
+
+        return presentStudents.stream()
+                .collect(Collectors.toMap(
+                        Student::getGroupId,
+                        student -> presentStudentsByGroup.keySet().stream()
+                                .filter(groupId -> !Objects.equals(groupId, student.getGroupId()))
+                                .flatMap(groupId -> presentStudentsByGroup.get(groupId).stream())
+                                .collect(Collectors.toMap(Student::getId, Function.identity()))
+                ));
+    }
+
+    private List<Pair> getPairOrCreateIfNotExist(List<CreatePairDto> dtos) {
+        List<Pair> fetchedPairEntities = pairService.findPairsByStudents(dtos);
+        List<CreatePairDto> notExistedPairsDtos = dtos.stream()
+                .filter(dto -> fetchedPairEntities.stream().
+                        noneMatch(pair -> pair.isPairConsistOfGivenStudents(dto.getStudentA(), dto.getStudentB())))
+                .toList();
+
+        if (notExistedPairsDtos.isEmpty()) {
+            return fetchedPairEntities;
+        }
+
+        for (CreatePairDto dto : notExistedPairsDtos) {
+            pairService.createPair(dto);
+        }
+
+        return pairService.findPairsByStudents(dtos);
+    }
+
+    private List<Pair> getPreviousPairs() {
+        Optional<Session> candidate = sessionService.getLastSession();
+
+        if (candidate.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Session lastSession = candidate.get();
+        List<Long> pairsIds = sessionRecordService.findBySessionId(lastSession.getId()).stream()
+                .map(SessionRecord::getPairId)
+                .toList();
+
+        return pairService.findPairsByIds(pairsIds);
+    }
+
+    private List<Student> getStudentsFromGroups(List<Long> groupsIds) {
+        return groupsIds.stream()
+                .flatMap(groupId -> groupStudentService.getAllGroupStudents(groupId).stream())
+                .toList();
+    }
+
+    private List<Student> getPresentStudents(List<Student> allStudents, List<Long> absentStudents) {
+        return allStudents.stream()
+                .filter(st -> !absentStudents.contains(st.getId()))
+                .toList();
+    }
+
+    private static class Helper {
+        List<CreatePairDto> generatedPairsDtos = new ArrayList<>();
+        List<Long> unpairedStudents = new ArrayList<>();
+        Map<Long, Long> takenStudents = new HashMap<>();
+
+        Predicate<Long> isStudentTaken = takenStudents::containsKey;
+        Consumer<Long> addToTakenStudents = (id) -> takenStudents.put(id, id);
+        BiConsumer<Long, Long> addToGeneratedPairDtos = (studentA, studentB) -> generatedPairsDtos.add(
+                CreatePairDto.builder()
+                        .studentA(studentA)
+                        .studentB(studentB)
+                        .build()
+        );
+
+        BiConsumer<Long, Long> addToTakenStudentsAndToGeneratedPairDtos = (studentA, studentB) -> {
+            addToTakenStudents.accept(studentA);
+            addToTakenStudents.accept(studentB);
+            addToGeneratedPairDtos.accept(studentA, studentB);
+        };
     }
 }

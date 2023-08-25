@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Builder
 @Getter
@@ -15,6 +16,11 @@ public class Pair {
     private Long id;
     private Long studentA;
     private Long studentB;
+
+    public boolean isPairConsistOfGivenStudents(Long stA, Long stB) {
+        return (Objects.equals(studentA, stA) && Objects.equals(studentB, stB))
+                || (Objects.equals(studentA, stB) && Objects.equals(studentB, stA));
+    }
 
     @Override
     public boolean equals(Object o) {
