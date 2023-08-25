@@ -66,20 +66,20 @@ public class Algorithm {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public static void main(String[] args) {
-        studentGpoupA = new ArrayList<>(List.of(1L,3L,5L));
-        studentGpoupB = new ArrayList<>(List.of(2L,4L,6L));
-        List<Long> absentStudents = new ArrayList<>(List.of(3L));
-        previousStudentPairs = List.of(
-                new CreatePairDto(1L, 2L),
-                new CreatePairDto(3L, 4L),
-                new CreatePairDto(5L,6L));
-        //System.out.println(algorithm.getStudentsPreviousPair(6, previousStudentPairs));
-        System.out.println(Algorithm.chooseRandomPair(Algorithm.getStudentListWithoutAbsent(studentGpoupA, absentStudents),
-                Algorithm.getStudentListWithoutAbsent(studentGpoupB, absentStudents)));
-        //System.out.println(Algorithm.getStudentListWithoutAbsent(studentGpoupA, absentStudents));
-        System.out.println(Algorithm.getUnpairedStudents(studentGpoupA,studentGpoupB, currentStudentPairs, absentStudents));
-    }
+//    public static void main(String[] args) {
+//        studentGpoupA = new ArrayList<>(List.of(1L,3L,5L));
+//        studentGpoupB = new ArrayList<>(List.of(2L,4L,6L));
+//        List<Long> absentStudents = new ArrayList<>(List.of(3L));
+//        previousStudentPairs = List.of(
+//                new CreatePairDto(1L, 2L),
+//                new CreatePairDto(3L, 4L),
+//                new CreatePairDto(5L,6L));
+//        //System.out.println(algorithm.getStudentsPreviousPair(6, previousStudentPairs));
+//        System.out.println(Algorithm.chooseRandomPair(Algorithm.getStudentListWithoutAbsent(studentGpoupA, absentStudents),
+//                Algorithm.getStudentListWithoutAbsent(studentGpoupB, absentStudents)));
+//        //System.out.println(Algorithm.getStudentListWithoutAbsent(studentGpoupA, absentStudents));
+//        System.out.println(Algorithm.getUnpairedStudents(studentGpoupA,studentGpoupB, currentStudentPairs, absentStudents));
+//    }
 }
 
 record ClientRequest(
