@@ -5,29 +5,22 @@ import org.example.quizMates.dto.http.GeneratePairsResponseDto;
 import org.example.quizMates.dto.pair.CreatePairDto;
 import org.example.quizMates.model.*;
 import org.example.quizMates.service.*;
+import org.example.quizMates.utils.GeneratePairsHelper;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class StudentsPairsServiceImpl implements StudentsPairsService {
-    private final SessionService sessionService;
-    private final SessionRecordService sessionRecordService;
-    private final PairService pairService;
-    private final StudentService studentService;
-    private final GroupService groupService;
-    private final GroupStudentService groupStudentService;
+    private final GeneratePairsHelper generateUtil;
 
     private StudentsPairsServiceImpl() {
-        this.sessionService = SessionServiceImpl.getInstance();
-        this.sessionRecordService = SessionRecordServiceImpl.getInstance();
-        this.pairService = PairServiceImpl.getInstance();
-        this.studentService = StudentServiceImpl.getInstance();
-        this.groupService = GroupServiceImpl.gteInstance();
-        this.groupStudentService = GroupStudentServiceImpl.getInstance();
+        this.generateUtil = GeneratePairsHelper.getInstance();
+    }
+
+    private StudentsPairsServiceImpl(GeneratePairsHelper generateUtil) {
+        this.generateUtil = generateUtil;
     }
 
     private static class StudentPairServiceImplSingleton {
@@ -43,9 +36,9 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
         List<Long> groupsIds = payload.getGroupsIds();
         List<Long> absentStudents = payload.getAbsentStudents();
 
-        List<Student> studentsFromGroups = getStudentsFromGroups(groupsIds);
-        List<Student> presentStudents = getPresentStudents(studentsFromGroups, absentStudents);
-        List<Pair> previousPairs = getPreviousPairs();
+        List<Student> studentsFromGroups = generateUtil.getStudentsFromGroups(groupsIds);
+        List<Student> presentStudents = generateUtil.getPresentStudents(studentsFromGroups, absentStudents);
+        List<Pair> previousPairs = generateUtil.getPreviousPairs();
 
         return previousPairs.isEmpty()
                 ? generatePairs(presentStudents)
@@ -53,10 +46,10 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
     }
 
     private GeneratePairsResponseDto generatePairsBasedOnPrevious(List<Student> presentStudents, List<Pair> previousPairs) {
-        Map<Long, Map<Long, Student>> possibleOpponentsForGroups = getGroupsWithPossibleOpponents(presentStudents);
+        Map<Long, Map<Long, Student>> possibleOpponentsForGroups = generateUtil.getGroupsWithPossibleOpponents(presentStudents);
         Helper helper = new Helper();
 
-        for(Student studentA : presentStudents) {
+        for (Student studentA : presentStudents) {
             Long studentAId = studentA.getId();
             if (helper.isStudentTaken.test(studentAId)) continue;
 
@@ -65,6 +58,8 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
 
 
             for (Long opponentId : possibleOpponents.keySet()) {
+                if (helper.isStudentTaken.test(opponentId)) continue;
+
                 boolean theSameAsPreviousPair = previousPairs.stream().anyMatch(pair ->
                         pair.isPairConsistOfGivenStudents(studentAId, opponentId));
 
@@ -92,16 +87,16 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
         }
 
         return GeneratePairsResponseDto.builder()
-                .pairs(getPairOrCreateIfNotExist(helper.generatedPairsDtos))
+                .pairs(generateUtil.getPairOrCreateIfNotExist(helper.generatedPairsDtos))
                 .unpairedStudentsIds(helper.unpairedStudents)
                 .build();
     }
 
     private GeneratePairsResponseDto generatePairs(List<Student> presentStudents) {
-        Map<Long, Map<Long, Student>> possibleOpponentsForGroups = getGroupsWithPossibleOpponents(presentStudents);
+        Map<Long, Map<Long, Student>> possibleOpponentsForGroups = generateUtil.getGroupsWithPossibleOpponents(presentStudents);
         Helper helper = new Helper();
 
-        for(Student studentA : presentStudents) {
+        for (Student studentA : presentStudents) {
             Long studentAId = studentA.getId();
             if (helper.isStudentTaken.test(studentAId)) continue;
 
@@ -121,68 +116,9 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
         }
 
         return GeneratePairsResponseDto.builder()
-                .pairs(getPairOrCreateIfNotExist(helper.generatedPairsDtos))
+                .pairs(generateUtil.getPairOrCreateIfNotExist(helper.generatedPairsDtos))
                 .unpairedStudentsIds(helper.unpairedStudents)
                 .build();
-    }
-
-    private Map<Long, Map<Long, Student>> getGroupsWithPossibleOpponents(List<Student> presentStudents) {
-        Map<Long, List<Student>> presentStudentsByGroup = presentStudents.stream()
-                .collect(Collectors.groupingBy(Student::getGroupId));
-
-        return presentStudents.stream()
-                .collect(Collectors.toMap(
-                        Student::getGroupId,
-                        student -> presentStudentsByGroup.keySet().stream()
-                                .filter(groupId -> !Objects.equals(groupId, student.getGroupId()))
-                                .flatMap(groupId -> presentStudentsByGroup.get(groupId).stream())
-                                .collect(Collectors.toMap(Student::getId, Function.identity()))
-                ));
-    }
-
-    private List<Pair> getPairOrCreateIfNotExist(List<CreatePairDto> dtos) {
-        List<Pair> fetchedPairEntities = pairService.findPairsByStudents(dtos);
-        List<CreatePairDto> notExistedPairsDtos = dtos.stream()
-                .filter(dto -> fetchedPairEntities.stream().
-                        noneMatch(pair -> pair.isPairConsistOfGivenStudents(dto.getStudentA(), dto.getStudentB())))
-                .toList();
-
-        if (notExistedPairsDtos.isEmpty()) {
-            return fetchedPairEntities;
-        }
-
-        for (CreatePairDto dto : notExistedPairsDtos) {
-            pairService.createPair(dto);
-        }
-
-        return pairService.findPairsByStudents(dtos);
-    }
-
-    private List<Pair> getPreviousPairs() {
-        Optional<Session> candidate = sessionService.getLastSession();
-
-        if (candidate.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        Session lastSession = candidate.get();
-        List<Long> pairsIds = sessionRecordService.findBySessionId(lastSession.getId()).stream()
-                .map(SessionRecord::getPairId)
-                .toList();
-
-        return pairService.findPairsByIds(pairsIds);
-    }
-
-    private List<Student> getStudentsFromGroups(List<Long> groupsIds) {
-        return groupsIds.stream()
-                .flatMap(groupId -> groupStudentService.getAllGroupStudents(groupId).stream())
-                .toList();
-    }
-
-    private List<Student> getPresentStudents(List<Student> allStudents, List<Long> absentStudents) {
-        return allStudents.stream()
-                .filter(st -> !absentStudents.contains(st.getId()))
-                .toList();
     }
 
     private static class Helper {
