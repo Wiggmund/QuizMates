@@ -134,9 +134,6 @@ public class PairRepositoryImpl implements PairRepository {
                 PreparedStatement statement = connection.prepareStatement(SELECT_PAIRS_BY_STUDENTS_SQL)
         ) {
             List<Pair> allPairs = new ArrayList<>();
-            ArrayList<Long> statementParams = new ArrayList<>(studentsAIds);
-            statementParams.addAll(studentsBIds);
-            setLongPlaceholders(statement, statementParams);
 
             try(ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -219,17 +216,40 @@ public class PairRepositoryImpl implements PairRepository {
     }
 
     private String generateSQLToFetchPairsByStudents(List<Long> studentsAIds, List<Long> studentsBIds) {
-        return "SELECT * FROM " +
-                TABLE_NAME +
-                " WHERE " +
-                STUDENT_A_COL +
-                " IN(" +
-                generatePlaceholders(studentsAIds.size()) +
-                ") AND " +
-                STUDENT_B_COL +
-                " IN(" +
-                generatePlaceholders(studentsBIds.size()) +
-                ")";
+        if (studentsAIds.size() != studentsBIds.size())
+            throw new RuntimeException("Different list sizes");
+
+        int index = 0;
+        Long firstStudentAId = studentsAIds.get(index);
+        Long firstStudentBId = studentsBIds.get(index);
+
+        String firstPart = String.format("(%s = %s AND %s = %s)",
+                STUDENT_A_COL, firstStudentAId, STUDENT_B_COL, firstStudentBId);
+
+        List<String> orParts = new ArrayList<>();
+        if (studentsAIds.size() > 1) {
+            for(int i = index + 1; i < studentsAIds.size(); i++) {
+                firstStudentAId = studentsAIds.get(i);
+                firstStudentBId = studentsBIds.get(i);
+
+                String orPart = String.format("OR (%s = %s AND %s = %s)",
+                        STUDENT_A_COL, firstStudentAId, STUDENT_B_COL, firstStudentBId);
+                orParts.add(orPart);
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT * FROM ");
+        sb.append(TABLE_NAME);
+        sb.append(" WHERE ");
+        sb.append(firstPart);
+
+
+        if (!orParts.isEmpty()) {
+            orParts.forEach(sb::append);
+        }
+
+        return sb.toString();
     }
 
     private String generatePlaceholders(int count) {

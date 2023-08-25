@@ -91,6 +91,7 @@ public class GeneratePairsHelper {
         Session lastSession = candidate.get();
         List<Long> pairsIds = sessionRecordService.findBySessionId(lastSession.getId()).stream()
                 .map(SessionRecord::getPairId)
+                .distinct()
                 .toList();
 
         return pairService.findPairsByIds(pairsIds);
