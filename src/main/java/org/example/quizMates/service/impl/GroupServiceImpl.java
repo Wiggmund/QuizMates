@@ -2,6 +2,7 @@ package org.example.quizMates.service.impl;
 
 import org.example.quizMates.dto.group.CreateGroupDto;
 import org.example.quizMates.dto.group.UpdateGroupDto;
+import org.example.quizMates.dto.group.UpdateGroupStudentAmount;
 import org.example.quizMates.exception.ResourceAlreadyExistException;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Group;
@@ -57,7 +58,6 @@ public class GroupServiceImpl implements GroupService {
         if (doTheSameGroupExist) {
             throw new ResourceAlreadyExistException(String.format(GROUP_DUPLICATE_EXCEPTION, dto.getName()));
         }
-
         groupRepository.createGroup(dto);
     }
 
@@ -73,6 +73,11 @@ public class GroupServiceImpl implements GroupService {
             }
         }
         groupRepository.updateGroup(dto);
+    }
+
+    @Override
+    public void updateGroupStudentAmount(UpdateGroupStudentAmount dto) {
+        groupRepository.updateGroupStudentAmount(dto);
     }
 }
 

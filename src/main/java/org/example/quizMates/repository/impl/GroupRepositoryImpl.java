@@ -4,6 +4,7 @@ import org.example.quizMates.db.DBConnection;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.group.CreateGroupDto;
 import org.example.quizMates.dto.group.UpdateGroupDto;
+import org.example.quizMates.dto.group.UpdateGroupStudentAmount;
 import org.example.quizMates.enums.GroupTable;
 import org.example.quizMates.exception.DBInternalException;
 import org.example.quizMates.model.Group;
@@ -130,10 +131,10 @@ public class GroupRepositoryImpl implements GroupRepository {
     }
 
     @Override
-    public void updateGroupStudentAmount(UpdateGroupDto dto){
+    public void updateGroupStudentAmount(UpdateGroupStudentAmount dto){
         try (
                 Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+                PreparedStatement statement = connection.prepareStatement(UPDATE_STUDENT_AMOUNT_SQL)
         ) {
             statement.setInt(1, dto.getStudentsAmount());
             statement.setLong(2, dto.getId());
