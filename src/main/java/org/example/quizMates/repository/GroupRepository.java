@@ -10,4 +10,5 @@ public interface GroupRepository extends CrudRepository<Group, Long> {
     Optional<Group> findByName(String name);
     void createGroup(CreateGroupDto dto);
     void updateGroup(UpdateGroupDto dto);
+    void updateGroupStudentAmount(UpdateGroupDto dto);
 }

@@ -8,6 +8,7 @@ import org.example.quizMates.enums.GroupTable;
 import org.example.quizMates.exception.DBInternalException;
 import org.example.quizMates.model.Group;
 import org.example.quizMates.repository.GroupRepository;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,14 +22,19 @@ public class GroupRepositoryImpl implements GroupRepository {
     private final static String TABLE_NAME = GroupTable.TABLE_NAME.getName();
     private final static String ID_COL = GroupTable.ID.getName();
     private final static String NAME_COL = GroupTable.NAME.getName();
+    private final static String STUDENTS_AMOUNT = GroupTable.STUDENTS_AMOUNT.getName();
+    private final static String TEAMLEAD_ID = GroupTable.TEAMLEAD_ID.getName();
     private final static String SELECT_BY_ID_SQL = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
     private final static String SELECT_BY_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
             TABLE_NAME, NAME_COL);
     private final static String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
     private final static String CREATE_SQL = String.format("INSERT INTO %s(%s) VALUES(?)",
             TABLE_NAME, NAME_COL);
-    private final static String UPDATE_SQL = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
-            TABLE_NAME, NAME_COL, ID_COL);
+    private final static String UPDATE_SQL = String.format("UPDATE %s SET %s = ?, %s = ? WHERE %s = ?",
+            TABLE_NAME, NAME_COL, TEAMLEAD_ID, ID_COL);
+
+    private final static String UPDATE_STUDENT_AMOUNT_SQL = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
+            TABLE_NAME, STUDENTS_AMOUNT, ID_COL);
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
 
@@ -46,14 +52,14 @@ public class GroupRepositoryImpl implements GroupRepository {
 
     @Override
     public List<Group> findAll() {
-        try(
+        try (
                 Connection connection = dbConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
                 ResultSet resultSet = statement.executeQuery()
         ) {
             List<Group> groups = new ArrayList<>();
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 groups.add(extractGroup(resultSet));
             }
 
@@ -65,13 +71,13 @@ public class GroupRepositoryImpl implements GroupRepository {
 
     @Override
     public Optional<Group> findById(Long id) {
-        try(
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_BY_ID_SQL)
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_BY_ID_SQL)
         ) {
             statement.setLong(1, id);
 
-            try(ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
                 return extractGroupIfPresent(resultSet);
             }
         } catch (SQLException e) {
@@ -81,13 +87,13 @@ public class GroupRepositoryImpl implements GroupRepository {
 
     @Override
     public Optional<Group> findByName(String name) {
-        try(
+        try (
                 Connection connection = dbConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SELECT_BY_NAME_SQL)
         ) {
             statement.setString(1, name);
 
-            try(ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
                 return extractGroupIfPresent(resultSet);
             }
         } catch (SQLException e) {
@@ -97,7 +103,7 @@ public class GroupRepositoryImpl implements GroupRepository {
 
     @Override
     public void createGroup(CreateGroupDto dto) {
-        try(
+        try (
                 Connection connection = dbConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(CREATE_SQL)
         ) {
@@ -110,11 +116,12 @@ public class GroupRepositoryImpl implements GroupRepository {
 
     @Override
     public void updateGroup(UpdateGroupDto dto) {
-        try(
+        try (
                 Connection connection = dbConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
         ) {
             statement.setString(1, dto.getName());
+            statement.setLong(2, dto.getTeamleadId());
             statement.setLong(3, dto.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -123,10 +130,24 @@ public class GroupRepositoryImpl implements GroupRepository {
     }
 
     @Override
+    public void updateGroupStudentAmount(UpdateGroupDto dto){
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)
+        ) {
+            statement.setInt(1, dto.getStudentsAmount());
+            statement.setLong(2, dto.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
     public void deleteById(Long id) {
-        try(
-            Connection connection = dbConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(DELETE_SQL)
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(DELETE_SQL)
         ) {
             statement.setLong(1, id);
             statement.executeUpdate();

@@ -14,5 +14,6 @@ import java.util.List;
 public class Group {
     private Long id;
     private String name;
-    private List<Student> students;
+    private Integer studentsAmount;
+    private Long teamleadId;
 }
