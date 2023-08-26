@@ -15,7 +15,4 @@ public class CreateSessionDto {
     private String title;
     private String description;
     private LocalDateTime date;
-    private Long bestStudent;
-    private Long bestGroup;
-    private Boolean status;
 }

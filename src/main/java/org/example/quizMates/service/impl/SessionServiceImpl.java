@@ -7,13 +7,17 @@ import org.example.quizMates.model.Session;
 import org.example.quizMates.repository.SessionRepository;
 import org.example.quizMates.repository.impl.SessionRepositoryImpl;
 import org.example.quizMates.service.DuplicationService;
+import org.example.quizMates.service.GroupService;
 import org.example.quizMates.service.SessionService;
+import org.example.quizMates.service.StudentService;
 
 import java.util.List;
 import java.util.Optional;
 
 public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
+    private final StudentService studentService;
+    private final GroupService groupService;
     private final DuplicationService duplicationService;
     private final static String SESSION_NOT_FOUND = "Session with id %s not found";
     private final static String SESSION_DUPLICATE_TITLE = "Session with title %s already exists";
@@ -22,6 +26,8 @@ public class SessionServiceImpl implements SessionService {
     private SessionServiceImpl() {
         this.sessionRepository = SessionRepositoryImpl.getInstance();
         this.duplicationService = DuplicationServiceImpl.getInstance();
+        this.studentService = StudentServiceImpl.getInstance();
+        this.groupService = GroupServiceImpl.gteInstance();
     }
 
     private static class SessionServiceSingleton {
@@ -67,6 +73,13 @@ public class SessionServiceImpl implements SessionService {
     public void updateSession(UpdateSessionDto dto) {
         Session session = findById(dto.getId());
 
+        if (dto.getBestStudent() != null) {
+            studentService.findById(dto.getBestStudent());
+        }
+        if (dto.getBestGroup() != null) {
+            groupService.findById(dto.getBestGroup());
+        }
+
         boolean doTitleTheSame = dto.getTitle().equalsIgnoreCase(session.getTitle());
 
         if (!doTitleTheSame) {
@@ -76,7 +89,7 @@ public class SessionServiceImpl implements SessionService {
                 throw new ResourceNotFoundException(
                         String.format(SESSION_DUPLICATE_TITLE, dto.getTitle()));
             }
-            sessionRepository.updateSession(dto);
         }
+        sessionRepository.updateSession(dto);
     }
 }

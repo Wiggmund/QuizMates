@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.example.quizMates.enums.SessionStatus;
 
 import java.time.LocalDateTime;
 
@@ -18,5 +19,5 @@ public class Session {
     private LocalDateTime date;
     private Long best_student;
     private Long best_group;
-    private Boolean status;
+    private SessionStatus status;
 }

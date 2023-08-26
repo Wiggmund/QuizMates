@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     date            TIMESTAMP NOT NULL,
     best_student    BIGINT REFERENCES students(id) ON DELETE SET NULL,
     best_group      BIGINT REFERENCES students(id) ON DELETE SET NULL,
-    status          BOOLEAN NOT NULL,
+    status          VARCHAR(255) NOT NULL,
     CONSTRAINT pk_sessions PRIMARY KEY (id),
     CONSTRAINT uc_sessions_title UNIQUE (title)
 );
