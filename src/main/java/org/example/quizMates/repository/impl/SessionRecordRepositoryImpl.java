@@ -4,6 +4,7 @@ import org.example.quizMates.db.DBConnection;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.sessionrecord.CreateSessionRecordDto;
 import org.example.quizMates.dto.sessionrecord.UpdateSessionRecordDto;
+import org.example.quizMates.enums.SessionRecordAction;
 import org.example.quizMates.enums.SessionRecordTable;
 import org.example.quizMates.exception.DBInternalException;
 import org.example.quizMates.model.SessionRecord;
@@ -24,16 +25,20 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
     private final static String SCORE_COL = SessionRecordTable.SCORE.getName();
     private final static String HOST_NOTES_COL = SessionRecordTable.HOST_NOTES.getName();
     private final static String WAS_PRESENT_COL = SessionRecordTable.WAS_PRESENT.getName();
+    private final static String ACTION_COL = SessionRecordTable.ACTION.getName();
+    private final static String QUESTION_COL = SessionRecordTable.QUESTION.getName();
     private static final String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
     private static final String SELECT_SESSION_RECORD_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
     private static final String SELECT_SESSION_RECORD_BY_STUDENT_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, STUDENT_ID_COL);
     private static final String SELECT_SESSION_RECORD_BY_SESSION_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME,SESSION_ID_COL);
     private final static String CREATE_SESSION_RECORD_SQL = String.format(
-            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES(?,?,?,?,?,?,?)",
-            TABLE_NAME, SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL, SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL);
+            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES(?,?,?,?,?,?,?,?,?)",
+            TABLE_NAME, SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL,
+            SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL, ACTION_COL, QUESTION_COL);
     private final static String UPDATE_SQL = String.format(
-            "UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?  WHERE %s = ?",
-            TABLE_NAME, SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL, SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL, ID_COL);
+            "UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?  WHERE %s = ?",
+            TABLE_NAME, SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL,
+            SCORE_COL, HOST_NOTES_COL, WAS_PRESENT_COL, ACTION_COL, QUESTION_COL, ID_COL);
     private static final String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
 
     private final DBConnection dbConnection;
@@ -142,8 +147,22 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
             ps.setDouble(3, dto.getStudentId());
             ps.setDouble(4, dto.getHostId());
             ps.setDouble(5, dto.getScore());
-            ps.setString(6, dto.getHostNotes());
+
+            if(dto.getHostNotes() == null) {
+                ps.setNull(6, Types.VARCHAR);
+            } else {
+                ps.setString(6, dto.getHostNotes());
+            }
+
             ps.setBoolean(7, dto.getWasPresent());
+            ps.setString(8, dto.getAction().name());
+
+            if(dto.getQuestion() == null) {
+                ps.setNull(9, Types.VARCHAR);
+            } else {
+                ps.setString(9, dto.getQuestion());
+            }
+
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -163,7 +182,9 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
             ps.setDouble(5, dto.getScore());
             ps.setString(6, dto.getHostNotes());
             ps.setBoolean(7, dto.getWasPresent());
-            ps.setLong(8,dto.getId());
+            ps.setString(8, dto.getAction().name());
+            ps.setString(9, dto.getQuestion());
+            ps.setLong(10,dto.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
@@ -194,14 +215,16 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
 
     private SessionRecord extractSessionRecord(ResultSet resultSet) throws SQLException {
         return SessionRecord.builder()
-                .id((resultSet.getLong(SessionRecordTable.ID.getName())))
-                .sessionId((resultSet.getLong(SessionRecordTable.SESSION_ID.getName())))
-                .pairId(resultSet.getLong(SessionRecordTable.PAIR_ID.getName()))
-                .studentId(resultSet.getLong(SessionRecordTable.STUDENT_ID.getName()))
-                .hostId(resultSet.getLong(SessionRecordTable.HOST_ID.getName()))
-                .score(resultSet.getDouble(SessionRecordTable.SCORE.getName()))
-                .hostNotes(resultSet.getString(SessionRecordTable.HOST_NOTES.getName()))
-                .wasPresent(resultSet.getBoolean(SessionRecordTable.WAS_PRESENT.getName()))
+                .id((resultSet.getLong(ID_COL)))
+                .sessionId((resultSet.getLong(SESSION_ID_COL)))
+                .pairId(resultSet.getLong(PAIR_ID_COL))
+                .studentId(resultSet.getLong(STUDENT_ID_COL))
+                .hostId(resultSet.getLong(HOST_ID_COL))
+                .score(resultSet.getDouble(SCORE_COL))
+                .hostNotes(resultSet.getString(HOST_NOTES_COL))
+                .wasPresent(resultSet.getBoolean(WAS_PRESENT_COL))
+                .action(SessionRecordAction.valueOf(resultSet.getString(ACTION_COL)))
+                .question(resultSet.getString(QUESTION_COL))
                 .build();
     }
 }

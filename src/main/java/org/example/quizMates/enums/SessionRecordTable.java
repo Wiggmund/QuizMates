@@ -12,7 +12,9 @@ public enum SessionRecordTable {
     HOST_ID("host_id"),
     SCORE("score"),
     HOST_NOTES("host_notes"),
-    WAS_PRESENT("was_present");
+    WAS_PRESENT("was_present"),
+    ACTION("action"),
+    QUESTION("question");
 
     private final String name;
     SessionRecordTable(String name) {

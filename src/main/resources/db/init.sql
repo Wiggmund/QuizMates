@@ -58,7 +58,9 @@ CREATE TABLE IF NOT EXISTS sessionsrecords (
      student_id     BIGINT REFERENCES students(id) ON DELETE SET NULL,
      host_id        BIGINT REFERENCES hosts(id) ON DELETE SET NULL,
      score          FLOAT NOT NULL,
-     host_notes     TEXT,
+     host_notes     VARCHAR(255),
      was_present    BOOLEAN NOT NULL,
+     action         VARCHAR(255) NOT NULL,
+     question       VARCHAR(255),
      CONSTRAINT pk_sessions_records PRIMARY KEY (id)
 );

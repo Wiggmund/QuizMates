@@ -6,26 +6,25 @@ import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.SessionRecord;
 import org.example.quizMates.repository.SessionRecordRepository;
 import org.example.quizMates.repository.impl.SessionRecordRepositoryImpl;
-import org.example.quizMates.service.DuplicationService;
-import org.example.quizMates.service.SessionRecordService;
-import org.example.quizMates.service.SessionService;
-import org.example.quizMates.service.StudentService;
+import org.example.quizMates.service.*;
 
 import java.util.List;
 
 public class SessionRecordServiceImpl implements SessionRecordService {
     private final SessionRecordRepository sessionRecordRepository;
-    private final DuplicationService duplicationService;
     private final StudentService studentService;
     private final SessionService sessionService;
+    private final PairService pairService;
+    private final HostService hostService;
 
     private final static String SESSION_RECORD_NOT_FOUND = "Session record with id %s not found";
 
     private SessionRecordServiceImpl() {
         this.sessionRecordRepository = SessionRecordRepositoryImpl.getInstance();
-        this.duplicationService = DuplicationServiceImpl.getInstance();
         this.studentService = StudentServiceImpl.getInstance();
         this.sessionService = SessionServiceImpl.getInstance();
+        this.pairService = PairServiceImpl.getInstance();
+        this.hostService = HostServiceImpl.getInstance();
     }
 
     private static class SessionRecordServiceSingleton {
@@ -66,12 +65,21 @@ public class SessionRecordServiceImpl implements SessionRecordService {
 
     @Override
     public void createSessionRecord(CreateSessionRecordDto dto) {
+        hostService.findById(dto.getHostId());
+        sessionService.findById(dto.getSessionId());
+        pairService.findById(dto.getPairId());
+        studentService.findById(dto.getStudentId());
+
         sessionRecordRepository.createSessionRecord(dto);
     }
 
     @Override
     public void updateSessionRecord(UpdateSessionRecordDto dto) {
-        sessionRecordRepository.updateSessionRecord(dto);
+        hostService.findById(dto.getHostId());
+        sessionService.findById(dto.getSessionId());
+        pairService.findById(dto.getPairId());
+        studentService.findById(dto.getStudentId());
 
+        sessionRecordRepository.updateSessionRecord(dto);
     }
 }

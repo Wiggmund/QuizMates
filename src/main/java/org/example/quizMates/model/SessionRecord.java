@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.example.quizMates.enums.SessionRecordAction;
 
 import java.time.LocalDateTime;
 
@@ -20,4 +21,6 @@ public class SessionRecord {
     private Double score;
     private String hostNotes;
     private Boolean wasPresent;
+    private SessionRecordAction action;
+    private String question;
 }
