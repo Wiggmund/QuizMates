@@ -27,7 +27,7 @@ import java.util.List;
 public class PairController extends HttpServlet {
     private final PairService pairService;
     private final static Gson gson = ApplicationConfig.GSON;
-    private final static String ID_REQ_PARAM = "id";
+    private final static String ID_REQ_PARAM = "pairId";
 
     public PairController() {
         this(PairServiceImpl.getInstance());

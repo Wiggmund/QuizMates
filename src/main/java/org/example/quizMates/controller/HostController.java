@@ -26,7 +26,7 @@ import java.util.List;
 public class HostController extends HttpServlet {
     private final HostService hostService;
     private static final Gson gson = ApplicationConfig.GSON;
-    private static final String ID_REQ_PARAM = "id";
+    private static final String ID_REQ_PARAM = "hostId";
 
     public HostController() {
         this(HostServiceImpl.getInstance());

@@ -28,7 +28,7 @@ import java.util.List;
 public class GroupController extends HttpServlet {
     private final GroupService groupService;
     private final static Gson gson = ApplicationConfig.GSON;
-    private final static String ID_REQ_PARAM = "id";
+    private final static String ID_REQ_PARAM = "groupId";
 
     public GroupController() {
         this(GroupServiceImpl.gteInstance());

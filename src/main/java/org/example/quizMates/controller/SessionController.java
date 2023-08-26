@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SessionController extends HttpServlet {
     private final SessionService sessionService;
-    private final static String ID_REQ_PARAM = "id";
+    private final static String ID_REQ_PARAM = "sessionId";
     private final static Gson gson = ApplicationConfig.GSON;
 
     public SessionController() {

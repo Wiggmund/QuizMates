@@ -25,7 +25,7 @@ import java.util.List;
 public class StudentController extends HttpServlet {
     private final StudentService studentService;
     private final static Gson gson = ApplicationConfig.GSON;
-    private final static String ID_REQ_PARAM = "id";
+    private final static String ID_REQ_PARAM = "studentId";
 
     public StudentController() {
         this(StudentServiceImpl.getInstance());
