@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class StudentsPairsServiceImpl implements StudentsPairsService {
     private final GeneratePairsHelper generateUtil;
@@ -35,12 +36,15 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
     public GeneratePairsResponseDto generatePairs(GeneratePairsRequestDto payload) {
         List<Long> groupsIds = payload.getGroupsIds();
         List<Long> absentStudents = payload.getAbsentStudents();
+        boolean byAllStudents = payload.isByAllStudents();
 
         List<Student> studentsFromGroups = generateUtil.getStudentsFromGroups(groupsIds);
         List<Student> presentStudents = generateUtil.getPresentStudents(studentsFromGroups, absentStudents);
         List<Pair> previousPairs = generateUtil.getPreviousPairs();
 
-        return previousPairs.isEmpty()
+        return byAllStudents
+                ? generatePairsByAllStudents(presentStudents)
+                : previousPairs.isEmpty()
                 ? generatePairs(presentStudents)
                 : generatePairsBasedOnPrevious(presentStudents, previousPairs);
     }
@@ -122,8 +126,56 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
             helper.addToTakenStudentsAndToGeneratedPairDtos.accept(studentAId, studentBId);
         }
 
+        List<Pair> generatedAndFetchedPairs = helper.generatedPairsDtos.isEmpty()
+                ? new ArrayList<>()
+                : generateUtil.getPairOrCreateIfNotExist(helper.generatedPairsDtos);
+
         return GeneratePairsResponseDto.builder()
-                .pairs(generateUtil.getPairOrCreateIfNotExist(helper.generatedPairsDtos))
+                .pairs(generatedAndFetchedPairs)
+                .unpairedStudentsIds(helper.unpairedStudents)
+                .build();
+    }
+
+    private GeneratePairsResponseDto generatePairsByAllStudents(List<Student> presentStudents) {
+        Helper helper = new Helper();
+        LinkedList<Long> possibleOpponents = presentStudents.stream()
+                .map(Student::getId)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        Collections.shuffle(possibleOpponents);
+
+
+        for(Student studentA : presentStudents) {
+            Long studentAId = studentA.getId();
+            if (helper.isStudentTaken.test(studentAId)) continue;
+
+            boolean goToNextStudent = false;
+            do {
+                Long opponentCandidate = possibleOpponents.poll();
+
+                if (opponentCandidate == null) {
+                    helper.unpairedStudents.add(studentAId);
+                    helper.addToTakenStudents.accept(studentAId);
+                    goToNextStudent = true;
+                    continue;
+                }
+
+                if (opponentCandidate.equals(studentAId)) continue;
+
+                if (helper.isStudentTaken.test(opponentCandidate)) continue;
+
+                helper.addToTakenStudentsAndToGeneratedPairDtos.accept(studentAId, opponentCandidate);
+                goToNextStudent = true;
+
+            } while(!goToNextStudent);
+        }
+
+        List<Pair> generatedAndFetchedPairs = helper.generatedPairsDtos.isEmpty()
+                ? new ArrayList<>()
+                : generateUtil.getPairOrCreateIfNotExist(helper.generatedPairsDtos);
+
+        return GeneratePairsResponseDto.builder()
+                .pairs(generatedAndFetchedPairs)
                 .unpairedStudentsIds(helper.unpairedStudents)
                 .build();
     }

@@ -14,4 +14,5 @@ import java.util.List;
 public class GeneratePairsRequestDto {
     private List<Long> groupsIds;
     private List<Long> absentStudents;
+    private boolean byAllStudents;
 }
