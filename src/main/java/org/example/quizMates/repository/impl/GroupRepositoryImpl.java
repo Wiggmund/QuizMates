@@ -23,8 +23,8 @@ public class GroupRepositoryImpl implements GroupRepository {
     private final static String TABLE_NAME = GroupTable.TABLE_NAME.getName();
     private final static String ID_COL = GroupTable.ID.getName();
     private final static String NAME_COL = GroupTable.NAME.getName();
-    private final static String STUDENTS_AMOUNT = GroupTable.STUDENTS_AMOUNT.getName();
-    private final static String TEAMLEAD_ID = GroupTable.TEAMLEAD_ID.getName();
+    private final static String STUDENTS_AMOUNT_COL = GroupTable.STUDENTS_AMOUNT.getName();
+    private final static String TEAMLEAD_ID_COL = GroupTable.TEAMLEAD_ID.getName();
     private final static String SELECT_BY_ID_SQL = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
     private final static String SELECT_BY_NAME_SQL = String.format("SELECT * FROM %s WHERE %s = ?",
             TABLE_NAME, NAME_COL);
@@ -32,10 +32,10 @@ public class GroupRepositoryImpl implements GroupRepository {
     private final static String CREATE_SQL = String.format("INSERT INTO %s(%s) VALUES(?)",
             TABLE_NAME, NAME_COL);
     private final static String UPDATE_SQL = String.format("UPDATE %s SET %s = ?, %s = ? WHERE %s = ?",
-            TABLE_NAME, NAME_COL, TEAMLEAD_ID, ID_COL);
+            TABLE_NAME, NAME_COL, TEAMLEAD_ID_COL, ID_COL);
 
     private final static String UPDATE_STUDENT_AMOUNT_SQL = String.format("UPDATE %s SET %s = ? WHERE %s = ?",
-            TABLE_NAME, STUDENTS_AMOUNT, ID_COL);
+            TABLE_NAME, STUDENTS_AMOUNT_COL, ID_COL);
     private final static String DELETE_SQL = String.format("DELETE FROM %s WHERE %s = ?",
             TABLE_NAME, ID_COL);
 
@@ -169,6 +169,8 @@ public class GroupRepositoryImpl implements GroupRepository {
         return Group.builder()
                 .id(resultSet.getLong(ID_COL))
                 .name(resultSet.getString(NAME_COL))
+                .teamleadId(resultSet.getLong(TEAMLEAD_ID_COL))
+                .studentsAmount(resultSet.getInt(STUDENTS_AMOUNT_COL))
                 .build();
     }
 }

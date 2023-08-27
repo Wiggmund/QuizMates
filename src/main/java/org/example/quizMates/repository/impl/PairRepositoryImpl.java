@@ -104,6 +104,8 @@ public class PairRepositoryImpl implements PairRepository {
 
     @Override
     public List<Pair> findPairsByIds(List<Long> ids) {
+        if (ids.isEmpty()) return new ArrayList<>();
+
         try (
             Connection connection = dbConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(generateSQLToFetchPairsByIds(ids))
