@@ -6,7 +6,10 @@ import lombok.Getter;
 public enum GroupTable {
     TABLE_NAME("groups"),
     ID("id"),
-    NAME("name");
+    NAME("name"),
+    STUDENTS_AMOUNT("students_amount"),
+    TEAMLEAD_ID("teamlead_Id");
+
 
     private final String name;
 

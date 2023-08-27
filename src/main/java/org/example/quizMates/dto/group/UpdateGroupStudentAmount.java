@@ -9,9 +9,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class UpdateGroupDto {
-    private Long id;
-    private String name;
-    private Integer studentsAmount;
-    private Long teamleadId;
+public class UpdateGroupStudentAmount {
+    Long id;
+    Integer studentsAmount;
 }

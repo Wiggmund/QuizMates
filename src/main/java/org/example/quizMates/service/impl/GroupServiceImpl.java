@@ -2,9 +2,11 @@ package org.example.quizMates.service.impl;
 
 import org.example.quizMates.dto.group.CreateGroupDto;
 import org.example.quizMates.dto.group.UpdateGroupDto;
+import org.example.quizMates.dto.group.UpdateGroupStudentAmount;
 import org.example.quizMates.exception.ResourceAlreadyExistException;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Group;
+import org.example.quizMates.model.Session;
 import org.example.quizMates.repository.GroupRepository;
 import org.example.quizMates.repository.impl.GroupRepositoryImpl;
 import org.example.quizMates.service.DuplicationService;
@@ -31,6 +33,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private final static String GROUP_NOT_FOUND = "Group with id %s not found";
+
     @Override
     public Group findById(Long id) {
         return groupRepository.findById(id).orElseThrow(() ->
@@ -55,19 +58,26 @@ public class GroupServiceImpl implements GroupService {
         if (doTheSameGroupExist) {
             throw new ResourceAlreadyExistException(String.format(GROUP_DUPLICATE_EXCEPTION, dto.getName()));
         }
-
         groupRepository.createGroup(dto);
     }
 
     @Override
     public void updateGroup(UpdateGroupDto dto) {
-        boolean doTheSameGroupExist = duplicationService.doTheSameGroupExist(dto.getName());
+        Group group = findById(dto.getId());
+        boolean doTheSameName = dto.getName().equalsIgnoreCase(group.getName());
 
-        if (doTheSameGroupExist) {
-            throw new ResourceAlreadyExistException(String.format(GROUP_DUPLICATE_EXCEPTION, dto.getName()));
+        if (!doTheSameName) {
+            boolean doTheSameGroupExist = duplicationService.doTheSameGroupExist(dto.getName());
+            if (doTheSameGroupExist) {
+                throw new ResourceAlreadyExistException(String.format(GROUP_DUPLICATE_EXCEPTION, dto.getName()));
+            }
         }
-
-        findById(dto.getId());
         groupRepository.updateGroup(dto);
     }
+
+    @Override
+    public void updateGroupStudentAmount(UpdateGroupStudentAmount dto) {
+        groupRepository.updateGroupStudentAmount(dto);
+    }
 }
+

@@ -2,6 +2,7 @@ package org.example.quizMates.service.impl;
 
 import org.example.quizMates.dto.group.AddStudentToGroupDto;
 import org.example.quizMates.dto.group.RemoveStudentFromGroupDto;
+import org.example.quizMates.dto.group.UpdateGroupStudentAmount;
 import org.example.quizMates.exception.ResourceAlreadyExistException;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Group;
@@ -51,6 +52,9 @@ public class GroupStudentServiceImpl implements GroupStudentService {
                     student.getFullName(), group.getName()));
         }
         groupStudentRepository.addStudentToGroup(dto);
+        groupService.updateGroupStudentAmount(UpdateGroupStudentAmount.builder()
+                        .studentsAmount(group.getStudentsAmount() + 1)
+                        .build());
     }
 
     @Override
@@ -64,5 +68,8 @@ public class GroupStudentServiceImpl implements GroupStudentService {
         }
 
         groupStudentRepository.removeStudentFromGroup(dto);
+        groupService.updateGroupStudentAmount(UpdateGroupStudentAmount.builder()
+                .studentsAmount(group.getStudentsAmount() - 1)
+                .build());
     }
 }
