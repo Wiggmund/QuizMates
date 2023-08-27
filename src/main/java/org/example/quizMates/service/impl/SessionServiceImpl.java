@@ -61,12 +61,12 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public void createSession(CreateSessionDto dto) {
+    public Long createSession(CreateSessionDto dto) {
         if (duplicationService.doTheSameSessionExist(dto.getTitle())) {
             throw new ResourceNotFoundException(String.format(SESSION_DUPLICATE_TITLE,
                     dto.getTitle()));
         }
-        sessionRepository.createSession(dto);
+        return sessionRepository.createSession(dto);
     }
 
     @Override

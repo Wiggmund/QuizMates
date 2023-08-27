@@ -118,7 +118,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
-    public void createSession(CreateSessionDto dto) {
+    public Long createSession(CreateSessionDto dto) {
         try (
             Connection connection = dbConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(CREATE_SESSIONS_SQL)
@@ -128,6 +128,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             ps.setTimestamp(3, Timestamp.valueOf(dto.getDate()));
             ps.setString(4, SessionStatus.CREATED.getName());
             ps.executeUpdate();
+            return findByTitle(dto.getTitle()).orElseThrow().getId();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }

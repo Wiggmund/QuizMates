@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface SessionService extends CrudService<Session, Long> {
     Optional<Session> getLastSession();
-    void createSession(CreateSessionDto dto);
+    Long createSession(CreateSessionDto dto);
     void updateSession(UpdateSessionDto dto);
 }
