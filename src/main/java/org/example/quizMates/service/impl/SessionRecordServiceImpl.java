@@ -3,6 +3,7 @@ package org.example.quizMates.service.impl;
 import org.example.quizMates.dto.sessionrecord.CreateSessionRecordDto;
 import org.example.quizMates.dto.sessionrecord.UpdateSessionRecordDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
+import org.example.quizMates.model.Host;
 import org.example.quizMates.model.SessionRecord;
 import org.example.quizMates.repository.SessionRecordRepository;
 import org.example.quizMates.repository.impl.SessionRecordRepositoryImpl;
@@ -39,6 +40,17 @@ public class SessionRecordServiceImpl implements SessionRecordService {
         return sessionRecordRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(SESSION_RECORD_NOT_FOUND, id)));
     }
+
+    @Override
+    public Host findByIdAndGetHostId(Long id) {
+        List<SessionRecord> sessionRecords = sessionRecordRepository.findBySessionId(id);
+        if (!sessionRecords.isEmpty()) {
+            SessionRecord sessionRecord = sessionRecords.get(0);
+            return hostService.findById(sessionRecord.getHostId());
+        }
+        return null;
+    }
+
 
     @Override
     public List<SessionRecord> findAll() {
