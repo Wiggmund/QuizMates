@@ -13,4 +13,5 @@ public interface SessionRecordService extends CrudService<SessionRecord, Long>{
     List<SessionRecord> findBySessionId(Long id);
     void createSessionRecord(CreateSessionRecordDto dto);
     void updateSessionRecord(UpdateSessionRecordDto dto);
+    Long findByIdAndGetHostId(Long id);
 }

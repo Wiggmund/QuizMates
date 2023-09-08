@@ -41,6 +41,17 @@ public class SessionRecordServiceImpl implements SessionRecordService {
     }
 
     @Override
+    public Long findByIdAndGetHostId(Long id) {
+        List<SessionRecord> sessionRecords = sessionRecordRepository.findBySessionId(id);
+        if (!sessionRecords.isEmpty()) {
+            SessionRecord sessionRecord = sessionRecords.get(0);
+            return sessionRecord.getHostId();
+        }
+        return null;
+    }
+
+
+    @Override
     public List<SessionRecord> findAll() {
         return sessionRecordRepository.findAll();
     }
