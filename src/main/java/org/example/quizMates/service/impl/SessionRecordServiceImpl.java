@@ -76,7 +76,7 @@ public class SessionRecordServiceImpl implements SessionRecordService {
     }
 
     @Override
-    public void createSessionRecord(CreateSessionRecordDto dto) {
+    public synchronized void createSessionRecord(CreateSessionRecordDto dto) {
         hostService.findById(dto.getHostId());
         sessionService.findById(dto.getSessionId());
         pairService.findById(dto.getPairId());

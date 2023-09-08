@@ -61,8 +61,8 @@ public class SessionController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             CreateSessionDto sessionDto = gson.fromJson(req.getReader(), CreateSessionDto.class);
-            sessionService.createSession(sessionDto);
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            Long sessionId = sessionService.createSession(sessionDto);
+            ControllerHelper.writeResponse(resp, sessionId, HttpServletResponse.SC_OK);
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
             ControllerHelper.writeResponse(resp, exceptionResponse, exceptionResponse.statusCode());
