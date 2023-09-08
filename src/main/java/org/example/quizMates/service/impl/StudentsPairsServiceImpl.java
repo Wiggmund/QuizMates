@@ -33,7 +33,7 @@ public class StudentsPairsServiceImpl implements StudentsPairsService {
     }
 
     @Override
-    public GeneratePairsResponseDto generatePairs(GeneratePairsRequestDto payload) {
+    public synchronized GeneratePairsResponseDto generatePairs(GeneratePairsRequestDto payload) {
         List<Long> groupsIds = payload.getGroupsIds();
         List<Long> absentStudents = payload.getAbsentStudents();
         boolean byAllStudents = payload.isByAllStudents();
