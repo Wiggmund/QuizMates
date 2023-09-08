@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.quizMates.config.ApplicationConfig;
 import org.example.quizMates.exception.ExceptionResponse;
 import org.example.quizMates.exception.GlobalExceptionHandler;
+import org.example.quizMates.model.Host;
 import org.example.quizMates.model.Session;
 import org.example.quizMates.service.SessionRecordService;
 import org.example.quizMates.service.SessionService;
@@ -38,10 +39,9 @@ public class GetHostBySessionIdController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String sessionId = req.getParameter(ID_REQ_PARAM);
-            String host = req.getParameter("host");
-            if (sessionId != null && !sessionId.isEmpty() && Boolean.parseBoolean(host)) {
-                Long neededHostId = sessionRecordService.findByIdAndGetHostId(Long.parseLong(sessionId));
-                ControllerHelper.writeResponse(resp, neededHostId, HttpServletResponse.SC_OK);
+            if (sessionId != null && !sessionId.isEmpty()) {
+                Host neededHost = sessionRecordService.findByIdAndGetHostId(Long.parseLong(sessionId));
+                ControllerHelper.writeResponse(resp, neededHost, HttpServletResponse.SC_OK);
             }
 //            } else {
 //                Session session = sessionService.findById(Long.parseLong(requiredId));
