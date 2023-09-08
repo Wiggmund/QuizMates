@@ -4,6 +4,7 @@ import org.example.quizMates.db.DBConnection;
 import org.example.quizMates.db.DBConnectionDriverManager;
 import org.example.quizMates.dto.session.CreateSessionDto;
 import org.example.quizMates.dto.session.UpdateSessionDto;
+import org.example.quizMates.enums.SessionRecordTable;
 import org.example.quizMates.enums.SessionStatus;
 import org.example.quizMates.enums.SessionTable;
 import org.example.quizMates.exception.DBInternalException;
@@ -17,6 +18,9 @@ import java.util.Optional;
 
 public class SessionRepositoryImpl implements SessionRepository {
     private static final String TABLE_NAME = SessionTable.TABLE_NAME.getName();
+    private static final String RECORDS_TABLE_NAME = SessionRecordTable.TABLE_NAME.getName();
+    private static final String RECORDS_SESSION_COL = SessionRecordTable.SESSION_ID.getName();
+    private static final String RECORDS_HOST_COL = SessionRecordTable.HOST_ID.getName();
     private final static String ID_COL = SessionTable.ID.getName();
     private static final String TITLE_COL = SessionTable.TITLE.getName();
     private final static String DESCRIPTION_COL = SessionTable.DESCRIPTION.getName();
@@ -27,6 +31,12 @@ public class SessionRepositoryImpl implements SessionRepository {
     private static final String SELECT_ALL_SQL = String.format("SELECT * FROM %s", TABLE_NAME);
     private static final String SELECT_SESSION_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME,
             ID_COL);
+    private static final String SELECT_SESSIONS_BY_HOST_ID = String.format(
+            "SELECT * FROM %s " +
+                    "JOIN %s on %s.%s = %s.%s " +
+                    "WHERE %s.%s = ?",
+            TABLE_NAME, RECORDS_TABLE_NAME, TABLE_NAME, ID_COL, RECORDS_TABLE_NAME, RECORDS_SESSION_COL,
+            RECORDS_TABLE_NAME, RECORDS_HOST_COL);
     private final static String CREATE_SESSIONS_SQL = String.format(
             "INSERT INTO %s (%s, %s, %s, %s) VALUES(?,?,?,?)",
             TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, STATUS_COL);
@@ -62,6 +72,28 @@ public class SessionRepositoryImpl implements SessionRepository {
 
             try (ResultSet resultSet = ps.executeQuery()) {
                 return extractSessionIfPresent(resultSet);
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Session> getHostSessions(Long hostId) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_SESSIONS_BY_HOST_ID)
+        ) {
+            List<Session> sessions = new ArrayList<>();
+            statement.setLong(1, hostId);
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Session fetchedSession = extractSession(resultSet);
+
+                    sessions.add(fetchedSession);
+                }
+                return sessions;
             }
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());

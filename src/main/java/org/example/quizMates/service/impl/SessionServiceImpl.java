@@ -6,10 +6,7 @@ import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Session;
 import org.example.quizMates.repository.SessionRepository;
 import org.example.quizMates.repository.impl.SessionRepositoryImpl;
-import org.example.quizMates.service.DuplicationService;
-import org.example.quizMates.service.GroupService;
-import org.example.quizMates.service.SessionService;
-import org.example.quizMates.service.StudentService;
+import org.example.quizMates.service.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +14,7 @@ import java.util.Optional;
 public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
     private final StudentService studentService;
+    private final HostService hostService;
     private final GroupService groupService;
     private final DuplicationService duplicationService;
     private final static String SESSION_NOT_FOUND = "Session with id %s not found";
@@ -28,6 +26,7 @@ public class SessionServiceImpl implements SessionService {
         this.duplicationService = DuplicationServiceImpl.getInstance();
         this.studentService = StudentServiceImpl.getInstance();
         this.groupService = GroupServiceImpl.gteInstance();
+        this.hostService = HostServiceImpl.getInstance();
     }
 
     private static class SessionServiceSingleton {
@@ -47,6 +46,12 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public List<Session> findAll() {
         return sessionRepository.findAll();
+    }
+
+    @Override
+    public List<Session> getHostSessions(Long hostId) {
+        hostService.findById(hostId);
+        return sessionRepository.getHostSessions(hostId);
     }
 
     @Override

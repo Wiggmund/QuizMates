@@ -25,6 +25,7 @@ import java.util.List;
 public class SessionController extends HttpServlet {
     private final SessionService sessionService;
     private final static String ID_REQ_PARAM = "sessionId";
+    private final static String HOST_REQ_PARAM = "hostId";
     private final static Gson gson = ApplicationConfig.GSON;
 
     public SessionController() {
@@ -35,6 +36,13 @@ public class SessionController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String requiredId = req.getParameter(ID_REQ_PARAM);
+            String hostId = req.getParameter(HOST_REQ_PARAM);
+
+            if (hostId != null && !hostId.isEmpty()) {
+                List<Session> hostSessions = sessionService.getHostSessions(Long.parseLong(hostId));
+                ControllerHelper.writeResponse(resp, hostSessions, HttpServletResponse.SC_OK);
+            }
+
             if (requiredId == null || requiredId.isEmpty()) {
                 List<Session> sessions = sessionService.findAll();
                 ControllerHelper.writeResponse(resp, sessions, HttpServletResponse.SC_OK);
