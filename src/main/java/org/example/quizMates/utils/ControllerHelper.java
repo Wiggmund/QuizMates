@@ -17,6 +17,10 @@ public class ControllerHelper {
         }
     }
 
+    public static boolean isParamPresent(String param) {
+        return param != null && !param.isEmpty();
+    }
+
     private static void setResponseHeaders(HttpServletResponse resp) {
         resp.setHeader("Content-Type", "application/json");
     }

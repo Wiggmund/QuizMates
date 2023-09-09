@@ -4,18 +4,21 @@ import org.example.quizMates.dto.session.CreateSessionDto;
 import org.example.quizMates.dto.session.UpdateSessionDto;
 import org.example.quizMates.exception.ResourceNotFoundException;
 import org.example.quizMates.model.Session;
+import org.example.quizMates.model.Student;
 import org.example.quizMates.repository.SessionRepository;
 import org.example.quizMates.repository.impl.SessionRepositoryImpl;
 import org.example.quizMates.service.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
     private final StudentService studentService;
     private final HostService hostService;
     private final GroupService groupService;
+    private final GroupStudentService groupStudentService;
     private final DuplicationService duplicationService;
     private final static String SESSION_NOT_FOUND = "Session with id %s not found";
     private final static String SESSION_DUPLICATE_TITLE = "Session with title %s already exists";
@@ -27,6 +30,7 @@ public class SessionServiceImpl implements SessionService {
         this.studentService = StudentServiceImpl.getInstance();
         this.groupService = GroupServiceImpl.gteInstance();
         this.hostService = HostServiceImpl.getInstance();
+        this.groupStudentService = GroupStudentServiceImpl.getInstance();
     }
 
     private static class SessionServiceSingleton {
@@ -52,6 +56,20 @@ public class SessionServiceImpl implements SessionService {
     public List<Session> getHostSessions(Long hostId) {
         hostService.findById(hostId);
         return sessionRepository.getHostSessions(hostId);
+    }
+
+    @Override
+    public Long getGroupScoreForSession(Long groupId, Long sessionId) {
+        findById(sessionId);
+        List<Long> studentsIds = groupStudentService.getAllGroupStudents(groupId)
+                .stream().map(Student::getId).toList();
+
+        return sessionRepository.getGroupScoreForSession(studentsIds, sessionId);
+    }
+
+    @Override
+    public Long getStudentScoreForSession(Long studentId, Long sessionId) {
+        return sessionRepository.getStudentScoreForSession(studentId, sessionId);
     }
 
     @Override

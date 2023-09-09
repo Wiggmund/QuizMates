@@ -20,6 +20,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     private static final String TABLE_NAME = SessionTable.TABLE_NAME.getName();
     private static final String RECORDS_TABLE_NAME = SessionRecordTable.TABLE_NAME.getName();
     private static final String RECORDS_SESSION_COL = SessionRecordTable.SESSION_ID.getName();
+    private static final String RECORDS_STUDENT_COL = SessionRecordTable.STUDENT_ID.getName();
     private static final String RECORDS_HOST_COL = SessionRecordTable.HOST_ID.getName();
     private final static String ID_COL = SessionTable.ID.getName();
     private static final String TITLE_COL = SessionTable.TITLE.getName();
@@ -37,6 +38,10 @@ public class SessionRepositoryImpl implements SessionRepository {
                     "WHERE %s.%s = ?",
             TABLE_NAME, RECORDS_TABLE_NAME, TABLE_NAME, ID_COL, RECORDS_TABLE_NAME, RECORDS_SESSION_COL,
             RECORDS_TABLE_NAME, RECORDS_HOST_COL);
+
+    private static final String SELECT_STUDENT_SCORE = String.format(
+            "SELECT SUM(score) as score FROM %s WHERE %s = ? AND %s = ?",
+            RECORDS_TABLE_NAME, RECORDS_SESSION_COL, RECORDS_STUDENT_COL);
     private final static String CREATE_SESSIONS_SQL = String.format(
             "INSERT INTO %s (%s, %s, %s, %s) VALUES(?,?,?,?)",
             TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, STATUS_COL);
@@ -150,6 +155,49 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
+    public Long getGroupScoreForSession(List<Long> studentsIds, Long sessionId) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(generateSelectGroupScoreSQL(studentsIds.size()))
+        ) {
+            int paramCounter = 1;
+            ps.setLong(paramCounter++, sessionId);
+            for (Long studentsId : studentsIds) {
+                ps.setLong(paramCounter++, studentsId);
+            }
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+                return 0L;
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Long getStudentScoreForSession(Long studentId, Long sessionId) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(SELECT_STUDENT_SCORE)
+        ) {
+            ps.setLong(1, sessionId);
+            ps.setLong(2, studentId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if(resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+                return 0L;
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
     public Session createSession(CreateSessionDto dto) {
         try (
             Connection connection = dbConnection.getConnection();
@@ -227,5 +275,22 @@ public class SessionRepositoryImpl implements SessionRepository {
                 .bestGroup((Long) resultSet.getObject(SessionTable.BEST_GROUP.getName()))
                 .status(SessionStatus.valueOf(resultSet.getString(SessionTable.STATUS.getName())))
                 .build();
+    }
+
+    private String generateSelectGroupScoreSQL(int placeholdersAmount) {
+        StringBuilder holders = new StringBuilder();
+        for (int i = 0; i < placeholdersAmount; i++) {
+            if (i == placeholdersAmount - 1) {
+                holders.append("?");
+                break;
+            }
+
+            holders.append("?,");
+        }
+
+        return String.format(
+                "SELECT SUM(score) as score FROM %s WHERE %s = ? AND %s IN (" + holders + ")",
+                RECORDS_TABLE_NAME, RECORDS_SESSION_COL, RECORDS_STUDENT_COL
+        );
     }
 }

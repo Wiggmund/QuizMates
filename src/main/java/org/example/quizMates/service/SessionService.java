@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface SessionService extends CrudService<Session, Long> {
     Optional<Session> getLastSession();
     List<Session> getHostSessions(Long hostId);
+    Long getGroupScoreForSession(Long groupId, Long sessionId);
+    Long getStudentScoreForSession(Long studentId, Long sessionId);
     Session createSession(CreateSessionDto dto);
     void updateSession(UpdateSessionDto dto);
 }

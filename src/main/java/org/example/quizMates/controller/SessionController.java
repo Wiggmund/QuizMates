@@ -20,12 +20,17 @@ import org.example.quizMates.utils.ControllerHelper;
 import java.io.IOException;
 import java.util.List;
 
+import static org.example.quizMates.utils.ControllerHelper.isParamPresent;
+
 @WebServlet("/sessions")
 @RequiredArgsConstructor
 public class SessionController extends HttpServlet {
     private final SessionService sessionService;
     private final static String ID_REQ_PARAM = "sessionId";
     private final static String HOST_REQ_PARAM = "hostId";
+    private final static String STUDENT_ID_REQ_PARAM = "studentId";
+    private final static String GROUP_REQ_PARAM = "groupId";
+    private final static String SCORE_REQ_PARAM = "score";
     private final static Gson gson = ApplicationConfig.GSON;
 
     public SessionController() {
@@ -36,19 +41,30 @@ public class SessionController extends HttpServlet {
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            String requiredId = req.getParameter(ID_REQ_PARAM);
+            String sessionId = req.getParameter(ID_REQ_PARAM);
             String hostId = req.getParameter(HOST_REQ_PARAM);
+            String studentId = req.getParameter(STUDENT_ID_REQ_PARAM);
+            String groupId = req.getParameter(GROUP_REQ_PARAM);
+            String score = req.getParameter(SCORE_REQ_PARAM);
 
-            if (hostId != null && !hostId.isEmpty()) {
+            if(isParamPresent(sessionId) && isParamPresent(studentId) && isParamPresent(score)) {
+                Long studentScoreForSession = sessionService.getStudentScoreForSession(
+                        Long.parseLong(studentId), Long.parseLong(sessionId)
+                );
+                ControllerHelper.writeResponse(resp, studentScoreForSession, HttpServletResponse.SC_OK);
+            } else if (isParamPresent(sessionId) && isParamPresent(groupId) && isParamPresent(score)) {
+                Long groupScoreForSession = sessionService.getGroupScoreForSession(
+                        Long.parseLong(groupId), Long.parseLong(sessionId)
+                );
+                ControllerHelper.writeResponse(resp, groupScoreForSession, HttpServletResponse.SC_OK);
+            } else if (hostId != null && !hostId.isEmpty()) {
                 List<Session> hostSessions = sessionService.getHostSessions(Long.parseLong(hostId));
                 ControllerHelper.writeResponse(resp, hostSessions, HttpServletResponse.SC_OK);
-            }
-
-            if (requiredId == null || requiredId.isEmpty()) {
+            } else if (sessionId == null || sessionId.isEmpty()) {
                 List<Session> sessions = sessionService.findAll();
                 ControllerHelper.writeResponse(resp, sessions, HttpServletResponse.SC_OK);
             } else {
-                Session session = sessionService.findById(Long.parseLong(requiredId));
+                Session session = sessionService.findById(Long.parseLong(sessionId));
                 ControllerHelper.writeResponse(resp, session, HttpServletResponse.SC_OK);
             }
         } catch (RuntimeException exception) {
