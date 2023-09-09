@@ -51,6 +51,12 @@ public class SessionRecordServiceImpl implements SessionRecordService {
         return null;
     }
 
+    @Override
+    public List<SessionRecord> findByStudentIdAndSessionId(Long studentId, Long sessionId) {
+        studentService.findById(studentId);
+        sessionService.findById(sessionId);
+        return this.sessionRecordRepository.findByStudentIdAndSessionId(studentId, sessionId);
+    }
 
     @Override
     public List<SessionRecord> findAll() {

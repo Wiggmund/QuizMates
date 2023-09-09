@@ -11,7 +11,7 @@ public interface SessionRecordRepository extends CrudRepository<SessionRecord, L
     Optional<SessionRecord> findById(Long id);
     List<SessionRecord> findByStudentId(Long id);
     List<SessionRecord> findBySessionId(Long id);
-
+    List<SessionRecord> findByStudentIdAndSessionId(Long studentId, Long sessionId);
     void createSessionRecord(CreateSessionRecordDto dto);
     void updateSessionRecord(UpdateSessionRecordDto dto);
     void deleteById(Long id);

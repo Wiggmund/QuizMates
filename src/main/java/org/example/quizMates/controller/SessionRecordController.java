@@ -37,12 +37,17 @@ public class SessionRecordController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
 
-            String requiredId = req.getParameter(ID_REQ_PARAM);
+            String recordId = req.getParameter(ID_REQ_PARAM);
             String studentId = req.getParameter(STUDENT_ID_REQ_PARAM);
             String sessionId = req.getParameter(SESSION_ID_REQ_PARAM);
 
-            if (requiredId != null && !requiredId.isEmpty()) {
-                SessionRecord sessionRecord = sessionRecordService.findById(Long.parseLong(requiredId));
+            if (studentId != null && sessionId != null) {
+                List<SessionRecord> recordsByStudentAndSession = sessionRecordService.findByStudentIdAndSessionId(
+                        Long.parseLong(studentId), Long.parseLong(sessionId)
+                );
+                ControllerHelper.writeResponse(resp, recordsByStudentAndSession, HttpServletResponse.SC_OK);
+            } else if  (recordId != null && !recordId.isEmpty()) {
+                SessionRecord sessionRecord = sessionRecordService.findById(Long.parseLong(recordId));
                 ControllerHelper.writeResponse(resp, sessionRecord, HttpServletResponse.SC_OK);
             } else if (studentId != null && !studentId.isEmpty()) {
                 List<SessionRecord> sessionRecords = sessionRecordService.findByStudentId(Long.parseLong(studentId));

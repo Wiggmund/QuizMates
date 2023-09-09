@@ -31,6 +31,8 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
     private static final String SELECT_SESSION_RECORD_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, ID_COL);
     private static final String SELECT_SESSION_RECORD_BY_STUDENT_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME, STUDENT_ID_COL);
     private static final String SELECT_SESSION_RECORD_BY_SESSION_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME,SESSION_ID_COL);
+    private static final String SELECT_RECORDS_BY_STUDENT_SESSION_ID = String.format("SELECT * FROM %s WHERE %s = ? AND %s = ?",
+            TABLE_NAME, STUDENT_ID_COL, SESSION_ID_COL);
     private final static String CREATE_SESSION_RECORD_SQL = String.format(
             "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES(?,?,?,?,?,?,?,?,?)",
             TABLE_NAME, SESSION_ID_COL, PAIR_ID_COL, STUDENT_ID_COL, HOST_ID_COL,
@@ -123,6 +125,29 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
             statement.setLong(1, id);
 
             try (ResultSet resultSet = statement.executeQuery()){
+                List<SessionRecord> sessionRecords = new ArrayList<>();
+                while (resultSet.next()) {
+                    SessionRecord fetchedSessionRecord = extractSessionRecord(resultSet);
+
+                    sessionRecords.add(fetchedSessionRecord);
+                }
+                return sessionRecords;
+            }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<SessionRecord> findByStudentIdAndSessionId(Long studentId, Long sessionId) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement ps = connection.prepareStatement(SELECT_RECORDS_BY_STUDENT_SESSION_ID)
+        ) {
+            ps.setLong(1, studentId);
+            ps.setLong(2, sessionId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
                 List<SessionRecord> sessionRecords = new ArrayList<>();
                 while (resultSet.next()) {
                     SessionRecord fetchedSessionRecord = extractSessionRecord(resultSet);

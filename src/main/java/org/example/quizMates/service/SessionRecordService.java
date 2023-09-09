@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface SessionRecordService extends CrudService<SessionRecord, Long>{
     List<SessionRecord> findByStudentId(Long id);
     List<SessionRecord> findBySessionId(Long id);
+    List<SessionRecord> findByStudentIdAndSessionId(Long studentId, Long sessionId);
     void createSessionRecord(CreateSessionRecordDto dto);
     void updateSessionRecord(UpdateSessionRecordDto dto);
     Host findByIdAndGetHostId(Long id);
