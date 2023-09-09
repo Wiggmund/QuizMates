@@ -17,7 +17,7 @@ public class Session {
     private String title;
     private String description;
     private LocalDateTime date;
-    private Long best_student;
-    private Long best_group;
+    private Long bestStudent;
+    private Long bestGroup;
     private SessionStatus status;
 }

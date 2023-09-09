@@ -11,6 +11,6 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
     Optional<Session> findByTitle(String title);
     Optional<Session> getLastSession();
     List<Session> getHostSessions(Long hostId);
-    Long createSession(CreateSessionDto dto);
+    Session createSession(CreateSessionDto dto);
     void updateSession(UpdateSessionDto dto);
 }

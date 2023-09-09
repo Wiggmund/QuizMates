@@ -150,7 +150,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
-    public Long createSession(CreateSessionDto dto) {
+    public Session createSession(CreateSessionDto dto) {
         try (
             Connection connection = dbConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(CREATE_SESSIONS_SQL)
@@ -160,7 +160,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             ps.setTimestamp(3, Timestamp.valueOf(dto.getDate()));
             ps.setString(4, SessionStatus.CREATED.getName());
             ps.executeUpdate();
-            return findByTitle(dto.getTitle()).orElseThrow().getId();
+            return findByTitle(dto.getTitle()).orElseThrow();
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }
@@ -223,8 +223,8 @@ public class SessionRepositoryImpl implements SessionRepository {
                 .title(resultSet.getString(SessionTable.TITLE.getName()))
                 .description(resultSet.getString(SessionTable.DESCRIPTION.getName()))
                 .date(resultSet.getTimestamp(SessionTable.DATE.getName()).toLocalDateTime())
-                .best_student((Long) resultSet.getObject(SessionTable.BEST_STUDENT.getName()))
-                .best_group((Long) resultSet.getObject(SessionTable.BEST_GROUP.getName()))
+                .bestStudent((Long) resultSet.getObject(SessionTable.BEST_STUDENT.getName()))
+                .bestGroup((Long) resultSet.getObject(SessionTable.BEST_GROUP.getName()))
                 .status(SessionStatus.valueOf(resultSet.getString(SessionTable.STATUS.getName())))
                 .build();
     }
