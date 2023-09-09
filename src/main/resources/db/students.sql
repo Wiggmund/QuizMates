@@ -13,3 +13,5 @@ insert into students(first_name, last_name, group_id) values ('Alexandr', 'Matyu
 insert into students(first_name, last_name, group_id) values ('Stepan', 'Dulka', 2);
 insert into students(first_name, last_name, group_id) values ('Yusufbek', 'Sulaymonov', 2);
 
+update groups set students_amount = 5, teamlead_id = 1 where id = 1;
+update groups set students_amount = 4, teamlead_id = 6 where id = 1;
