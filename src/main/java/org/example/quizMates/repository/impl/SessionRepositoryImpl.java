@@ -22,6 +22,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     private static final String RECORDS_SESSION_COL = SessionRecordTable.SESSION_ID.getName();
     private static final String RECORDS_STUDENT_COL = SessionRecordTable.STUDENT_ID.getName();
     private static final String RECORDS_HOST_COL = SessionRecordTable.HOST_ID.getName();
+    private static final String RECORDS_WAS_PRESENT_COL = SessionRecordTable.WAS_PRESENT.getName();
     private final static String ID_COL = SessionTable.ID.getName();
     private static final String TITLE_COL = SessionTable.TITLE.getName();
     private final static String DESCRIPTION_COL = SessionTable.DESCRIPTION.getName();
@@ -42,6 +43,15 @@ public class SessionRepositoryImpl implements SessionRepository {
     private static final String SELECT_STUDENT_SCORE = String.format(
             "SELECT SUM(score) as score FROM %s WHERE %s = ? AND %s = ?",
             RECORDS_TABLE_NAME, RECORDS_SESSION_COL, RECORDS_STUDENT_COL);
+
+    private static final String SELECT_PRESENT_STUDENTS = String.format(
+            "SELECT %s from %s WHERE %s = ? AND %s = true",
+            RECORDS_STUDENT_COL, RECORDS_TABLE_NAME, RECORDS_SESSION_COL, RECORDS_WAS_PRESENT_COL
+    );
+    private static final String SELECT_ABSENT_STUDENTS = String.format(
+            "SELECT %s from %s WHERE %s = ? AND %s = false",
+            RECORDS_STUDENT_COL, RECORDS_TABLE_NAME, RECORDS_SESSION_COL, RECORDS_WAS_PRESENT_COL
+    );
     private final static String CREATE_SESSIONS_SQL = String.format(
             "INSERT INTO %s (%s, %s, %s, %s) VALUES(?,?,?,?)",
             TABLE_NAME, TITLE_COL, DESCRIPTION_COL, DATE_COL, STATUS_COL);
@@ -192,6 +202,44 @@ public class SessionRepositoryImpl implements SessionRepository {
                 }
                 return 0L;
             }
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Long> getPresentStudents(Long sessionId) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_PRESENT_STUDENTS);
+                ResultSet resultSet = statement.executeQuery()
+        ) {
+            List<Long> presentStudentsIds = new ArrayList<>();
+
+            while (resultSet.next()) {
+                presentStudentsIds.add(resultSet.getLong(1));
+            }
+
+            return presentStudentsIds;
+        } catch (SQLException e) {
+            throw new DBInternalException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Long> getAbsentStudents(Long sessionId) {
+        try (
+                Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SELECT_ABSENT_STUDENTS);
+                ResultSet resultSet = statement.executeQuery()
+        ) {
+            List<Long> absentStudentsIds = new ArrayList<>();
+
+            while (resultSet.next()) {
+                absentStudentsIds.add(resultSet.getLong(1));
+            }
+
+            return absentStudentsIds;
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }

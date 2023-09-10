@@ -13,6 +13,8 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
     Long getGroupScoreForSession(List<Long> studentsIds, Long sessionId);
     Long getStudentScoreForSession(Long studentId, Long sessionId);
     List<Session> getHostSessions(Long hostId);
+    List<Long> getPresentStudents(Long sessionId);
+    List<Long> getAbsentStudents(Long sessionId);
     Session createSession(CreateSessionDto dto);
     void updateSession(UpdateSessionDto dto);
 }

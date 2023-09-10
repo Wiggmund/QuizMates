@@ -73,6 +73,20 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public List<Student> getPresentStudents(Long sessionId) {
+        findById(sessionId);
+        List<Long> presentStudentsIds = sessionRepository.getPresentStudents(sessionId);
+        return studentService.findStudentsByIds(presentStudentsIds);
+    }
+
+    @Override
+    public List<Student> getAbsentStudents(Long sessionId) {
+        findById(sessionId);
+        List<Long> absentStudentsIds = sessionRepository.getAbsentStudents(sessionId);
+        return studentService.findStudentsByIds(absentStudentsIds);
+    }
+
+    @Override
     public void deleteById(Long id) {
         findById(id);
         sessionRepository.deleteById(id);
