@@ -34,9 +34,10 @@ public class SessionRepositoryImpl implements SessionRepository {
     private static final String SELECT_SESSION_BY_ID = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_NAME,
             ID_COL);
     private static final String SELECT_SESSIONS_BY_HOST_ID = String.format(
-            "SELECT * FROM %s " +
+            "SELECT DISTINCT(%s.%s), %s.* FROM %s " +
                     "JOIN %s on %s.%s = %s.%s " +
                     "WHERE %s.%s = ?",
+            TABLE_NAME, ID_COL, TABLE_NAME,
             TABLE_NAME, RECORDS_TABLE_NAME, TABLE_NAME, ID_COL, RECORDS_TABLE_NAME, RECORDS_SESSION_COL,
             RECORDS_TABLE_NAME, RECORDS_HOST_COL);
 

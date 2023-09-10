@@ -68,15 +68,15 @@ public class SessionController extends HttpServlet {
                         Long.parseLong(groupId), Long.parseLong(sessionId)
                 );
                 ControllerHelper.writeResponse(resp, groupScoreForSession, HttpServletResponse.SC_OK);
-            } else if (hostId != null && !hostId.isEmpty()) {
+            } else if (!isParamPresent(sessionId) && isParamPresent(hostId)) {
                 List<Session> hostSessions = sessionService.getHostSessions(Long.parseLong(hostId));
                 ControllerHelper.writeResponse(resp, hostSessions, HttpServletResponse.SC_OK);
-            } else if (sessionId == null || sessionId.isEmpty()) {
-                List<Session> sessions = sessionService.findAll();
-                ControllerHelper.writeResponse(resp, sessions, HttpServletResponse.SC_OK);
-            } else {
+            } else if (isParamPresent(sessionId)) {
                 Session session = sessionService.findById(Long.parseLong(sessionId));
                 ControllerHelper.writeResponse(resp, session, HttpServletResponse.SC_OK);
+            } else {
+                List<Session> sessions = sessionService.findAll();
+                ControllerHelper.writeResponse(resp, sessions, HttpServletResponse.SC_OK);
             }
         } catch (RuntimeException exception) {
             ExceptionResponse exceptionResponse = GlobalExceptionHandler.handleException(exception);
