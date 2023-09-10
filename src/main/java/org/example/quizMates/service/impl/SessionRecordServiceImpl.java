@@ -85,7 +85,9 @@ public class SessionRecordServiceImpl implements SessionRecordService {
     public synchronized void createSessionRecord(CreateSessionRecordDto dto) {
         hostService.findById(dto.getHostId());
         sessionService.findById(dto.getSessionId());
-        pairService.findById(dto.getPairId());
+        if (dto.getPairId() != null) {
+            pairService.findById(dto.getPairId());
+        }
         studentService.findById(dto.getStudentId());
 
         sessionRecordRepository.createSessionRecord(dto);

@@ -168,7 +168,13 @@ public class SessionRecordRepositoryImpl implements SessionRecordRepository{
                 PreparedStatement ps = connection.prepareStatement(CREATE_SESSION_RECORD_SQL)
         ) {
             ps.setDouble(1, dto.getSessionId());
-            ps.setDouble(2, dto.getPairId());
+
+            if (dto.getPairId() == null) {
+                ps.setNull(2, Types.BIGINT);
+            } else {
+                ps.setDouble(2, dto.getPairId());
+            }
+
             ps.setDouble(3, dto.getStudentId());
             ps.setDouble(4, dto.getHostId());
             ps.setDouble(5, dto.getScore());

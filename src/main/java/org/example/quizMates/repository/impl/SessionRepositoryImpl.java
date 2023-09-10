@@ -211,16 +211,19 @@ public class SessionRepositoryImpl implements SessionRepository {
     public List<Long> getPresentStudents(Long sessionId) {
         try (
                 Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SELECT_PRESENT_STUDENTS);
-                ResultSet resultSet = statement.executeQuery()
+                PreparedStatement statement = connection.prepareStatement(SELECT_PRESENT_STUDENTS)
         ) {
-            List<Long> presentStudentsIds = new ArrayList<>();
+            statement.setLong(1, sessionId);
 
-            while (resultSet.next()) {
-                presentStudentsIds.add(resultSet.getLong(1));
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<Long> presentStudentsIds = new ArrayList<>();
+
+                while (resultSet.next()) {
+                    presentStudentsIds.add(resultSet.getLong(1));
+                }
+
+                return presentStudentsIds;
             }
-
-            return presentStudentsIds;
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }
@@ -230,16 +233,19 @@ public class SessionRepositoryImpl implements SessionRepository {
     public List<Long> getAbsentStudents(Long sessionId) {
         try (
                 Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SELECT_ABSENT_STUDENTS);
-                ResultSet resultSet = statement.executeQuery()
+                PreparedStatement statement = connection.prepareStatement(SELECT_ABSENT_STUDENTS)
         ) {
-            List<Long> absentStudentsIds = new ArrayList<>();
+            statement.setLong(1, sessionId);
 
-            while (resultSet.next()) {
-                absentStudentsIds.add(resultSet.getLong(1));
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<Long> absentStudentsIds = new ArrayList<>();
+
+                while (resultSet.next()) {
+                    absentStudentsIds.add(resultSet.getLong(1));
+                }
+
+                return absentStudentsIds;
             }
-
-            return absentStudentsIds;
         } catch (SQLException e) {
             throw new DBInternalException(e.getMessage());
         }
